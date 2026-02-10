@@ -7,9 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HrmsUserDetailsService implements UserDetailsService {
     private final EmployeeRepository employeeRepository;
 
@@ -17,6 +19,7 @@ public class HrmsUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Employee employee = employeeRepository.findByUserEmail(email).orElseThrow(()->new UsernameNotFoundException("User not found."));
-        return new HrmsUserDetails(employee);
+        String roleName = employee.getRole().getName();
+        return new HrmsUserDetails(employee.getId(),employee.getUser().getEmail(),employee.getUser().getPassword(),roleName);
     }
 }
