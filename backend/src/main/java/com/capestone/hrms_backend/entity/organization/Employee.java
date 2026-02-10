@@ -1,11 +1,13 @@
 package com.capestone.hrms_backend.entity.organization;
 
 import com.capestone.hrms_backend.entity.shared.Base;
+import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "employees")
@@ -54,4 +56,8 @@ public class Employee extends Base {
 
     @Column(name = "profile_pic_path")
     private String profilePath;
+
+    //ManyToMany
+    @ManyToMany(mappedBy = "employees")
+    private Set<TravelPlan> travelPlans;
 }
