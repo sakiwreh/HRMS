@@ -35,6 +35,13 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	// Source: https://mvnrepository.com/artifact/org.modelmapper/modelmapper
 	implementation("org.modelmapper:modelmapper:3.1.1")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	// Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+	// Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	// Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 }
 
 tasks.withType<Test> {
