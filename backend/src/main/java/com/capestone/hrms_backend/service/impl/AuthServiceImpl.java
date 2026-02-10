@@ -31,7 +31,7 @@ public class AuthServiceImpl implements IAuthService {
         if(!passwordEncoder.matches(request.getPassword(),employee.getUser().getPassword()))
             throw new BusinessException("Invalid password");
 
-        HrmsUserDetails hrmsUserDetails = new HrmsUserDetails(employee);
+        HrmsUserDetails hrmsUserDetails = new HrmsUserDetails(employee.getId(),employee.getUser().getEmail(),employee.getUser().getPassword(),employee.getRole().getName());
         String token = jwtUtil.generateToken(hrmsUserDetails);
 
         return AuthResponseDto.builder()

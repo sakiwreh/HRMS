@@ -11,25 +11,28 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class HrmsUserDetails implements UserDetails {
-    private final Employee employee;
+    private final Long empId;
+    private final String email;
+    private final String password;
+    private final String roleName;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+employee.getRole().getName()));
+        return List.of(new SimpleGrantedAuthority("ROLE_"+roleName));
     }
 
     @Override
     public String getPassword() {
-        return employee.getUser().getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return employee.getUser().getEmail();
+        return email;
     }
 
     public Long getEmployeeId(){
-        return employee.getId();
+        return empId;
     }
 
     @Override
