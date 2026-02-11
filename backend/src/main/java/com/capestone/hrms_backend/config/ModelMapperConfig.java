@@ -1,6 +1,8 @@
 package com.capestone.hrms_backend.config;
 
+import com.capestone.hrms_backend.dto.response.TravelDocumentResponseDto;
 import com.capestone.hrms_backend.dto.response.TravelPlanResponseDto;
+import com.capestone.hrms_backend.entity.travel.TravelDocument;
 import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
