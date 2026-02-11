@@ -56,8 +56,4 @@ public class Employee extends Base {
 
     @Column(name = "profile_pic_path")
     private String profilePath;
-
-    //ManyToMany
-    @ManyToMany(mappedBy = "employees")
-    private Set<TravelPlan> travelPlans;
 }
