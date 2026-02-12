@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 public class TravelPlanResponseDto {
     private Long id;
     private String title;
+    private String description;
     private String destination;
     private boolean cancelled;
     private LocalDateTime departureDate;
     private LocalDateTime returnDate;
     private LocalDateTime createdAt;
-    private String createdBy;
+    private Long createdBy;
 }

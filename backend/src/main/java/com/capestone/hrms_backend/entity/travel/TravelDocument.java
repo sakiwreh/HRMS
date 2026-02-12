@@ -2,6 +2,7 @@ package com.capestone.hrms_backend.entity.travel;
 
 import com.capestone.hrms_backend.entity.organization.Employee;
 import com.capestone.hrms_backend.entity.shared.Base;
+import com.capestone.hrms_backend.entity.shared.Document;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.Fetch;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Table(name = "travel_documents")
 @Getter
 @Setter
-public class TravelDocument extends Base {
+public class TravelDocument extends Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,7 @@ public class TravelDocument extends Base {
 
     //M:1
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "travel_plan_id")
+    @JoinColumn(name = "travel_plan_id",nullable = false)
     private TravelPlan travelPlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,24 +29,10 @@ public class TravelDocument extends Base {
     private Employee uploadedFor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uploaded_by")
+    @JoinColumn(name = "uploaded_by",nullable = false)
     private Employee uploadedBy;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "document_type")
     private DocType docType;
-
-    @Column(name = "file_name")
-    private String fileName;
-
-    @Column(name = "file_size")
-    private Integer fileSize;
-
-    private String description;
-
-    @Column(name = "file_type")
-    private String fileType;
-
-    @Column(name = "file_path")
-    private String filePath;
 }

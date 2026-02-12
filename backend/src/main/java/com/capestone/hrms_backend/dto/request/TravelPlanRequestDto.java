@@ -1,5 +1,6 @@
 package com.capestone.hrms_backend.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,17 +12,18 @@ import java.time.LocalDateTime;
 @Setter
 public class TravelPlanRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "Title cannot be blank")
     private String title;
 
     private String description;
 
-    @NotNull
+    @NotBlank(message = "Destination is required")
     private String destination;
 
-    @NotNull
+    @NotNull(message = "Departure date is required")
+    @FutureOrPresent(message = "Departure cannot be past date")
     private LocalDateTime departureDate;
 
-    @NotNull
+    @FutureOrPresent(message = "Return date cannot be past date")
     private LocalDateTime returnDate;
 }
