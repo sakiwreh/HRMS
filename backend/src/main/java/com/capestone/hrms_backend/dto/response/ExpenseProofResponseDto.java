@@ -1,14 +1,13 @@
 package com.capestone.hrms_backend.dto.response;
 
-import com.capestone.hrms_backend.entity.travel.DocType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class TravelDocumentResponseDto {
+public class ExpenseProofResponseDto {
     private Long id;
-    private DocType docType;
+    private Long expenseId;
     private String description;
     private String fileName;
     private Long fileSize;
