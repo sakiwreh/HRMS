@@ -26,8 +26,15 @@ public class JobOpening extends Base {
     @JoinColumn(name = "created_by",nullable = false)
     private Employee createdBy;
 
+    @Column(name = "experience_required",nullable = false)
+    private float experienceRequired;
+
     @Column(nullable = false,name = "communication_email")
     private String communicationEmail;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private JobStatus status;
 
     private String reason;
 
