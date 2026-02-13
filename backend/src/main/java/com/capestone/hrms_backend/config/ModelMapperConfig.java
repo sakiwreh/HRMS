@@ -42,10 +42,10 @@ public class ModelMapperConfig {
                 .addMappings(m->{
                     m.map(doc -> doc.getExpense().getEmployee().getId(),ExpenseProofResponseDto::setUploadedById);
                 });
-        modelMapper.typeMap(Employee.class, EmployeeShorterResponseDto.class)
-                .addMappings(m->{
-                    m.map(emp->emp.getFirstName()+" "+emp.getLastName(),EmployeeShorterResponseDto::setName);
-                });
+//        modelMapper.typeMap(Employee.class, EmployeeShorterResponseDto.class)
+//                .addMappings(m->{
+//                    m.map(emp->emp.getFirstName()+" "+emp.getLastName(),EmployeeShorterResponseDto::setName);
+//                });
         return modelMapper;
     }
 }
