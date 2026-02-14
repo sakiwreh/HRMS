@@ -19,7 +19,7 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "emp_id")
-    private Employee empId;
+    private Employee employee;
 
     @Column(nullable = false)
     private String subject;
