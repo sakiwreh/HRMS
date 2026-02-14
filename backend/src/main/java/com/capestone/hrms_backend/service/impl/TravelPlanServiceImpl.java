@@ -35,9 +35,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     public TravelPlanResponseDto create(TravelPlanRequestDto request, Long employeeId) {
         Employee hr = employeeRepository.findById(employeeId).orElseThrow(()->new ResourceNotFoundException("Employee not found"));
 
-        //Validations
-        if(!hr.getRole().getName().equals("HR"))
-            throw new BusinessException("Only HR can create travel plans");
+        //Validations DTO part, config mapper
         if(request.getDepartureDate().isBefore(LocalDateTime.now()))
             throw new BusinessException("Travel must start in future");
         if(request.getReturnDate().isBefore(request.getDepartureDate()))
