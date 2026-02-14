@@ -1,9 +1,11 @@
 package com.capestone.hrms_backend.config;
 
+import com.capestone.hrms_backend.dto.response.EmployeeShorterResponseDto;
 import com.capestone.hrms_backend.dto.response.ExpenseProofResponseDto;
 import com.capestone.hrms_backend.dto.response.TravelDocumentResponseDto;
 import com.capestone.hrms_backend.dto.response.TravelPlanResponseDto;
 import com.capestone.hrms_backend.entity.expense.ExpenseProof;
+import com.capestone.hrms_backend.entity.organization.Employee;
 import com.capestone.hrms_backend.entity.travel.TravelDocument;
 import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import org.modelmapper.Conditions;
@@ -40,7 +42,10 @@ public class ModelMapperConfig {
                 .addMappings(m->{
                     m.map(doc -> doc.getExpense().getEmployee().getId(),ExpenseProofResponseDto::setUploadedById);
                 });
-
+//        modelMapper.typeMap(Employee.class, EmployeeShorterResponseDto.class)
+//                .addMappings(m->{
+//                    m.map(emp->emp.getFirstName()+" "+emp.getLastName(),EmployeeShorterResponseDto::setName);
+//                });
         return modelMapper;
     }
 }
