@@ -1,0 +1,34 @@
+export type Role = "HR" | "MANAGER" | "EMPLOYEE";
+ 
+export interface NavItem {
+  label: string;
+  path: string;
+}
+ 
+export const navigation: Record<Role, NavItem[]> = {
+  HR: [
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "Travel Plans", path: "/dashboard/travel" },
+    { label: "Expense Review", path: "/dashboard/expenses/review" },
+    { label: "Jobs", path: "/dashboard/jobs" },
+    { label: "Organization", path: "/dashboard/org" },
+    { label: "Games", path: "/dashboard/games" },
+    { label: "Notifications", path: "/dashboard/notifications" },
+  ],
+ 
+  MANAGER: [
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "Team Travels", path: "/dashboard/travel" },
+    { label: "Expense Review", path: "/dashboard/expenses/review" },
+    { label: "Organization", path: "/dashboard/org" },
+    { label: "Notifications", path: "/dashboard/notifications" },
+  ],
+ 
+  EMPLOYEE: [
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "My Travels", path: "/dashboard/travel" },
+    { label: "My Expenses", path: "/dashboard/expenses" },
+    { label: "Games", path: "/dashboard/games" },
+    { label: "Notifications", path: "/dashboard/notifications" },
+  ],
+};
