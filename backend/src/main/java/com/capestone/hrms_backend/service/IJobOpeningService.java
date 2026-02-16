@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IJobOpeningService {
-    JobOpeningResponseDto create(JobOpeningRequestDto dto) throws IOException;
+    JobOpeningResponseDto create(Long hrId,JobOpeningRequestDto dto) throws IOException;
     JobOpeningResponseDto getById(Long id);
     List<JobOpeningResponseDto> getAllOpenings();
     void changeStatus(Long id, JobStatus status, String remarks);

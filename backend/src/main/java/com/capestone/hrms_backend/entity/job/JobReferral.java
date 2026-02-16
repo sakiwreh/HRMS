@@ -35,7 +35,7 @@ public class JobReferral {
     private String candidatePhoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private ReferralStatus status;
+    private ReferralStatus status = ReferralStatus.REFERRED;
 
     private String notes;
 }

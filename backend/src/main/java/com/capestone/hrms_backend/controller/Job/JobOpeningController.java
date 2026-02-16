@@ -1,15 +1,18 @@
 package com.capestone.hrms_backend.controller.Job;
 
+import com.capestone.hrms_backend.dto.request.AddCvReveiwerRequestDto;
 import com.capestone.hrms_backend.dto.request.JobOpeningRequestDto;
 import com.capestone.hrms_backend.dto.request.JobStatusRequestDto;
 import com.capestone.hrms_backend.dto.response.JobOpeningResponseDto;
 import com.capestone.hrms_backend.entity.job.JobStatus;
+import com.capestone.hrms_backend.security.HrmsUserDetails;
 import com.capestone.hrms_backend.service.IJobOpeningService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -24,8 +27,8 @@ public class JobOpeningController {
 
     @PreAuthorize("hasRole('HR')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<JobOpeningResponseDto> create(@Valid @ModelAttribute JobOpeningRequestDto dto) throws IOException{
-        return ResponseEntity.ok(jobOpeningService.create(dto));
+    public ResponseEntity<JobOpeningResponseDto> create(@AuthenticationPrincipal HrmsUserDetails user, @Valid @ModelAttribute JobOpeningRequestDto dto) throws IOException{
+        return ResponseEntity.ok(jobOpeningService.create(user.getEmpId(),dto));
     }
 
     @GetMapping("/{id}")
@@ -44,4 +47,20 @@ public class JobOpeningController {
         jobOpeningService.changeStatus(id,dto.getStatus(), dto.getReason());
         return ResponseEntity.ok("Status updated!");
     }
+
+    @PreAuthorize("hasRole('HR')")
+    @PostMapping("/{id}/add-reviewer")
+    public ResponseEntity<String> addReviewer(@PathVariable Long id,@Valid @RequestBody AddCvReveiwerRequestDto dto){
+        jobOpeningService.addReviewer(id,dto.getEmpIds());
+        return ResponseEntity.ok("Reviewer/s added to job opening");
+    }
+
+    @PreAuthorize("hasRole('HR')")
+    @DeleteMapping("/{id}/remove-reviewer/{empId}")
+    public ResponseEntity<String> removeReviewer(@PathVariable Long id, @PathVariable Long empId){
+        jobOpeningService.removeReviewer(id,empId);
+        return ResponseEntity.ok("Reveiwer removed from job");
+    }
+
+
 }
