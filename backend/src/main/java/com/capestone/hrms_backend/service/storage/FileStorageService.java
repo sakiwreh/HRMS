@@ -73,6 +73,24 @@ public class FileStorageService {
         return path.toString();
     }
 
+    public String saveCv(Long refId,MultipartFile file) throws IOException{
+        String folder = basePath + "cvs/" + refId + "/";
+
+        //Creating directory
+        Files.createDirectories(Paths.get(folder));
+
+        //Generating name
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        //Generating path
+        Path path = Paths.get(folder+fileName);
+
+        //Saving File
+        Files.copy(file.getInputStream(),path, StandardCopyOption.REPLACE_EXISTING);
+
+        return path.toString();
+    }
+
     public byte[] read(String path) throws IOException{
         return Files.readAllBytes(Paths.get(path));
     }

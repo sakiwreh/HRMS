@@ -7,6 +7,7 @@ import com.capestone.hrms_backend.entity.travel.TravelDocument;
 import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,6 +17,11 @@ public class ModelMapperConfig {
     @Bean
     public ModelMapper modelMapper(){
         ModelMapper modelMapper = new ModelMapper();
+
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT)
+                .setPropertyCondition(Conditions.isNotNull())
+                .setSkipNullEnabled(true);
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
 
         //HR id from:: TravelPlan to TravelResponseDto

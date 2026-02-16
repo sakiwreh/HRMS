@@ -15,9 +15,6 @@ public class JobOpeningRequestDto {
     @NotNull(message = "description must be there.")
     private String description;
 
-    @NotNull(message = "Creator is required")
-    private Long hrId;
-
     @NotNull(message = "Communication email is necessary")
     @Email(message = "Entered email id is not valid")
     private String communicationEmail;
@@ -27,5 +24,4 @@ public class JobOpeningRequestDto {
     private Float experienceRequired;
 
     private MultipartFile file;
-
 }

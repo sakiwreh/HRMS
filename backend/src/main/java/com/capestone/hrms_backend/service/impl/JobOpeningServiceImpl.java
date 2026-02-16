@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,21 +34,15 @@ public class JobOpeningServiceImpl implements IJobOpeningService {
     private final ModelMapper modelMapper;
 
     @Override
-    public JobOpeningResponseDto create(JobOpeningRequestDto dto) throws IOException {
-        Employee employee = employeeRepository.findById(dto.getHrId()).orElseThrow(()->new ResourceNotFoundException("Employee doesn't exist."));
-        JobOpening opening = new JobOpening();
-        opening.setCreatedBy(employee);
-        opening.setDescription(dto.getDescription());
-        opening.setTitle(dto.getTitle());
-        opening.setCommunicationEmail(dto.getCommunicationEmail());
-        opening.setExperienceRequired(dto.getExperienceRequired());
-        opening.setCommunicationEmail(dto.getCommunicationEmail());
-
+    public JobOpeningResponseDto create(Long hrId,JobOpeningRequestDto dto) throws IOException {
+        JobOpening job = modelMapper.map(dto,JobOpening.class);
+        Employee hr = employeeRepository.findById(hrId).orElseThrow(()->new ResourceNotFoundException("Employee not found"));
+        job.setCreatedBy(hr);
         String path = fileService.saveJd(dto.getTitle(), dto.getFile());
-        opening.setJobDescriptionUrl(path);
+        job.setJobDescriptionUrl(path);
 
-        jobOpeningRepository.save(opening);
-        return modelMapper.map(opening, JobOpeningResponseDto.class);
+        jobOpeningRepository.save(job);
+        return modelMapper.map(job, JobOpeningResponseDto.class);
     }
 
     @Override
@@ -91,12 +86,13 @@ public class JobOpeningServiceImpl implements IJobOpeningService {
     }
 
     @Override
+    @Transactional
     public void removeReviewer(Long jobOpeningId, Long empId) {
-
+        reviewerRepository.deleteByJobIdAndReveiwerId(jobOpeningId,empId);
     }
 
     @Override
     public List<JobOpeningReviewerResponseDto> getReviewers(Long jobOpeningId) {
-        return List.of();
+        return reviewerRepository.findByJobId(jobOpeningId).stream().map(j -> modelMapper.map(j, JobOpeningReviewerResponseDto.class)).toList();
     }
 }

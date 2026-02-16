@@ -34,7 +34,7 @@ public class JobOpening extends Base {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private JobStatus status;
+    private JobStatus status = JobStatus.OPEN;
 
     private String reason;
 

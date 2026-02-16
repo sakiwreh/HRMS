@@ -4,6 +4,7 @@ import com.capestone.hrms_backend.entity.organization.Employee;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class JobShare {
     @Column(name = "candidate_email")
     private String candidateEmail;
 
-    @CreatedDate
+    @CreationTimestamp
     @Column(name = "shared_at")
     private LocalDateTime sharedAt;
 }
