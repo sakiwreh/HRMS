@@ -59,7 +59,4 @@ public class JwtUtil {
         try{parseClaims(token); return true;}
         catch(Exception e){return false;}
     }
-
-
-
 }
