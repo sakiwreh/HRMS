@@ -1,17 +1,12 @@
-import { Provider } from "react-redux";
-import { store } from "../store/store";
-import { type ReactNode } from "react";
-import { useAuthInit } from "../modules/auth/hooks/useAuthInit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
  
-function Init({ children }: { children: ReactNode }) {
-  useAuthInit();
-  return <>{children}</>;
-}
+const queryClient = new QueryClient();
  
-export default function AppProviders({ children }: { children: ReactNode }) {
+export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <Provider store={store}>
-      <Init>{children}</Init>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
   );
 }

@@ -1,11 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
  
-export default function ProtectedRoute({ children }: any) {
-  const { user, initialized } = useAppSelector((s) => s.auth);
+export default function ProtectedRoute({ children }: { children: any }) {
+  const reduxUser = useAppSelector(state => state.auth.user);
+  const localUser = localStorage.getItem("auth_user");
  
-  if (!initialized) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  // if both missing → not authenticated
+  if (!reduxUser && !localUser)
+    return <Navigate to="/login" replace />;
  
   return children;
 }
+ 

@@ -1,26 +1,91 @@
 import { useForm } from "react-hook-form";
-import { useLogin } from "../hooks/useLogin";
+import { useState } from "react";
+import useLogin from "../hooks/useLogin";
  
-interface FormData {
+type LoginForm = {
   email: string;
   password: string;
-}
+};
  
 export default function LoginPage() {
-  const { register, handleSubmit } = useForm<FormData>();
-  const { login } = useLogin();
+  const login = useLogin();
+  const [serverError, setServerError] = useState("");
+ 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<LoginForm>();
+ 
+  const onSubmit = async (data: LoginForm) => {
+    setServerError("");
+ 
+    const result = await login(data.email, data.password);
+ 
+    if (!result.success)
+      setServerError(result.message || "Login failed");
+  };
  
   return (
-    <div className="flex items-center justify-center h-screen">
-      <form onSubmit={handleSubmit(login)} className="border p-6 w-80 space-y-4">
-        <h2 className="text-xl font-bold">Login</h2>
+    <div className="h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-6 rounded shadow w-80"
+      >
+        <h2 className="text-xl font-semibold mb-4">Login</h2>
  
-        <input {...register("email")} placeholder="Email" className="border p-2 w-full" />
-        <input {...register("password")} type="password" placeholder="Password" className="border p-2 w-full" />
+        {/* server error */}
+        {serverError && (
+          <div className="bg-red-100 text-red-600 text-sm p-2 mb-3 rounded">
+            {serverError}
+          </div>
+        )}
  
-        <button className="bg-blue-500 text-white p-2 w-full">Login</button>
+        {/* email */}
+        <input
+          type="email"
+          placeholder="Email"
+          className="border p-2 w-full rounded mb-1"
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /\S+@\S+\.\S+/,
+              message: "Invalid email format"
+            }
+          })}
+        />
+        {errors.email && (
+          <p className="text-red-500 text-xs mb-2">
+            {errors.email.message}
+          </p>
+        )}
+ 
+        {/* password */}
+        <input
+          type="password"
+          placeholder="Password"
+          className="border p-2 w-full rounded mb-1"
+          {...register("password", {
+            required: "Password is required",
+            minLength: {
+              value: 4,
+              message: "Password must be at least 4 characters"
+            }
+          })}
+        />
+        {errors.password && (
+          <p className="text-red-500 text-xs mb-3">
+            {errors.password.message}
+          </p>
+        )}
+ 
+        <button
+          disabled={isSubmitting}
+          className="bg-blue-500 text-white w-full py-2 rounded mt-2 disabled:opacity-50"
+        >
+          {isSubmitting ? "Logging in..." : "Login"}
+        </button>
       </form>
     </div>
   );
 }
- 
