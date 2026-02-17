@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ITravelDocumentService {
     TravelDocumentResponseDto upload(Long travelId, Long uploaderId,Long uploadedFor, DocType type, String desc, MultipartFile file) throws IOException;
-    List<TravelDocumentResponseDto> getByTravelId(Long travelId) throws IOException;
+    List<TravelDocumentResponseDto> getByTravelId(Long travelId, Long empId, String role) throws IOException;
     byte[] download(Long docId) throws IOException;
     void delete(Long docId,Long requesterId, String role)throws IOException;
 }

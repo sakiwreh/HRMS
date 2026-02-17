@@ -43,8 +43,8 @@ public class TravelPlanController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('HR')")
-    public ResponseEntity<TravelPlanResponseDto> getById(@PathVariable Long id){
-        return ResponseEntity.ok(travelPlanService.getTravel(id));
+    public ResponseEntity<TravelPlanResponseDto> getById(@PathVariable Long id,@AuthenticationPrincipal HrmsUserDetails user){
+        return ResponseEntity.ok(travelPlanService.getTravel(id, user.getEmpId(), user.getRoleName()));
     }
 
     @PostMapping("/{id}/add-participants")

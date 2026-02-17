@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -34,6 +35,9 @@ public class TravelPlan extends Base {
 
     @Column(name = "is_cancelled",nullable = false)
     private boolean cancelled = false;
+
+    @Column(name="max_per_day_amount", precision = 12, scale = 2)
+    private BigDecimal maxPerDayAmount;
 
     @Column(name = "departure_date",nullable = false)
     private LocalDateTime depatureDate;

@@ -30,8 +30,8 @@ public class TravelDocumentController {
     }
 
     @GetMapping("/travel-plans/{id}/documents")
-    public ResponseEntity<List<TravelDocumentResponseDto>> getByTravelId(@PathVariable Long id) throws IOException{
-        return ResponseEntity.ok(travelDocumentService.getByTravelId(id));
+    public ResponseEntity<List<TravelDocumentResponseDto>> getByTravelId(@PathVariable Long id,@AuthenticationPrincipal HrmsUserDetails user) throws IOException{
+        return ResponseEntity.ok(travelDocumentService.getByTravelId(id, user.getEmpId(), user.getRoleName()));
     }
 
     @GetMapping("/travel-plan/documents/{id}/download")

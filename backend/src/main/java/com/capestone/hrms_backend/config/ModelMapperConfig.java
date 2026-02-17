@@ -39,6 +39,7 @@ public class ModelMapperConfig {
         modelMapper.typeMap(TravelDocument.class,TravelDocumentResponseDto.class)
                 .addMappings(m->{
                     m.map(doc -> doc.getUploadedBy().getId(),TravelDocumentResponseDto::setUploadedById);
+                    m.map(doc -> doc.getUploadedFor().getId(),TravelDocumentResponseDto::setUploadedForId);
                 });
 
         modelMapper.typeMap(ExpenseProof.class, ExpenseProofResponseDto.class)

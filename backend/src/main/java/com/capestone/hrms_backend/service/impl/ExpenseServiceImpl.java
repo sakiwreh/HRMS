@@ -17,11 +17,13 @@ import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanParticipantRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanRepository;
 import com.capestone.hrms_backend.service.IExpenseService;
+import com.capestone.hrms_backend.service.INotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class ExpenseServiceImpl implements IExpenseService {
     private final ExpenseCategoryRepository expenseCategoryRepository;
     private final TravelPlanParticipantRepository participantRepository;
     private final ModelMapper modelMapper;
+    private final INotificationService notificationService;
 
     @Override
     public ExpenseResponseDto create(Long empId, ExpenseRequestDto requestDto) {
@@ -58,6 +61,19 @@ public class ExpenseServiceImpl implements IExpenseService {
         if(requestDto.getExpenseDate().isBefore(plan.getDepatureDate())) throw new BusinessException("Expense must be filed for travel duration only.");
 
         if(LocalDateTime.now().isAfter(plan.getReturnDate().plusDays(10))) throw new BusinessException("Expense window closed");
+
+        if(requestDto.getExpenseDate().isAfter(plan.getReturnDate())) throw new BusinessException("Expense date cannot be after travel date.");
+
+        if (plan.getMaxPerDayAmount() != null) {
+            LocalDateTime dayStart = requestDto.getExpenseDate().toLocalDate().atStartOfDay();
+            LocalDateTime dayEnd = dayStart.plusDays(1);
+            BigDecimal dailyTotal = repo.sumAmountByEmployeeAndTravelAndDate(empId, plan.getId(), dayStart, dayEnd);
+            if (dailyTotal.add(requestDto.getAmount()).compareTo(plan.getMaxPerDayAmount()) > 0) {
+                throw new BusinessException(
+                        String.format("Daily expense limit exceeded. Max allowed: %s, already claimed: %s, this expense: %s",
+                                plan.getMaxPerDayAmount(), dailyTotal, requestDto.getAmount()));
+            }
+        }
 
         Expense e = new Expense();
         e.setEmployee(emp);
@@ -105,6 +121,18 @@ public class ExpenseServiceImpl implements IExpenseService {
         }
         repo.save(e);
 
+        String status = e.getStatus() == ExpenseStatus.APPROVED ? "Approved" : "Rejected";
+        String subject = "Expense " + status + ": " + e.getDescription();
+        String body = String.format(
+                "Your expense of %s %s for \"%s\" has been %s by HR.",
+                e.getAmount(), e.getCurrency() != null ? e.getCurrency() : "",
+                e.getDescription(), status.toLowerCase()
+        );
+        if (e.getRemarks() != null && !e.getRemarks().isBlank()) {
+            body += " Remarks: " + e.getRemarks();
+        }
+        notificationService.create(e.getEmployee().getId(), subject, body);
+
         return modelMapper.map(e, ExpenseResponseDto.class);
     }
 
@@ -112,4 +140,19 @@ public class ExpenseServiceImpl implements IExpenseService {
     public List<ExpenseCategoryResponseDto> getAllCategories() {
         return expenseCategoryRepository.findAll().stream().map(m->modelMapper.map(m,ExpenseCategoryResponseDto.class)).toList();
     }
+
+    @Override
+    public BigDecimal getTotalByTravel(Long travelId) {
+        travelPlanRepository.findById(travelId).orElseThrow(()->new ResourceNotFoundException("Travel plan not found"));
+        return repo.sumAmountByTravelPlanId(travelId);
+    }
+
+    @Override
+    public List<ExpenseResponseDto> getFiltered(Long employeeId, ExpenseStatus status, Long travelId,LocalDateTime fromDate, LocalDateTime toDate) {
+        return repo.findFiltered(employeeId, status, travelId,fromDate,toDate).stream()
+                .map(m -> modelMapper.map(m, ExpenseResponseDto.class)).toList();
+    }
+
+
+
 }

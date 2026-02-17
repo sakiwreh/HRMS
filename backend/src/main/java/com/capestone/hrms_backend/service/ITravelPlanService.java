@@ -11,7 +11,7 @@ public interface ITravelPlanService {
     TravelPlanResponseDto create(TravelPlanRequestDto request, Long employeeId);
     List<TravelPlanResponseDto> getAllTravelPlans();
     TravelPlanResponseDto cancel(Long planId);
-    TravelPlanResponseDto getTravel(Long travelPlanId);
+    TravelPlanResponseDto getTravel(Long travelPlanId,Long empId, String role);
     void addParticipants(Long travelPlanId, List<Long> empIds);
     void removeParticipant(Long travelPlanId, Long empId);
     List<TravelParticipantResponseDto> getParticipants(Long travelPlanId);

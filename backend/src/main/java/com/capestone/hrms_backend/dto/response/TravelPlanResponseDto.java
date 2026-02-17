@@ -3,6 +3,7 @@ package com.capestone.hrms_backend.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,4 +18,5 @@ public class TravelPlanResponseDto {
     private LocalDateTime returnDate;
     private LocalDateTime createdAt;
     private Long createdBy;
+    private BigDecimal maxPerDayAmount;
 }

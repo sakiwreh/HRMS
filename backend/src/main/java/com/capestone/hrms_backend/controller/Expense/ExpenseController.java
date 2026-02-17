@@ -4,14 +4,18 @@ import com.capestone.hrms_backend.dto.request.ExpenseRequestDto;
 import com.capestone.hrms_backend.dto.request.ReviewExpenseRequestDto;
 import com.capestone.hrms_backend.dto.response.ExpenseCategoryResponseDto;
 import com.capestone.hrms_backend.dto.response.ExpenseResponseDto;
+import com.capestone.hrms_backend.entity.expense.ExpenseStatus;
 import com.capestone.hrms_backend.security.HrmsUserDetails;
 import com.capestone.hrms_backend.service.IExpenseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,7 +25,7 @@ public class ExpenseController {
     private final IExpenseService expenseService;
 
     @PostMapping
-    public ResponseEntity<ExpenseResponseDto> create(@AuthenticationPrincipal HrmsUserDetails user, @RequestBody ExpenseRequestDto requestDto){
+    public ResponseEntity<ExpenseResponseDto> create(@AuthenticationPrincipal HrmsUserDetails user,@Valid @RequestBody ExpenseRequestDto requestDto){
         return ResponseEntity.ok(expenseService.create(user.getEmployeeId(),requestDto));
     }
 
@@ -37,12 +41,28 @@ public class ExpenseController {
 
     @PatchMapping("/{id}/review")
     @PreAuthorize("hasRole('HR')")
-    public ResponseEntity<ExpenseResponseDto> review(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @RequestBody ReviewExpenseRequestDto requestDto){
+    public ResponseEntity<ExpenseResponseDto> review(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user,@Valid @RequestBody ReviewExpenseRequestDto requestDto){
         return ResponseEntity.ok(expenseService.review(id, user.getEmpId(),requestDto));
     }
 
     @GetMapping("/categories")
     public ResponseEntity<List<ExpenseCategoryResponseDto>> getAll(){
         return ResponseEntity.ok(expenseService.getAllCategories());
+    }
+
+    @GetMapping("/travel/{travelId}/total")
+    public ResponseEntity<BigDecimal> totalByTravel(@PathVariable Long travelId){
+        return ResponseEntity.ok(expenseService.getTotalByTravel(travelId));
+    }
+
+    @GetMapping("/filter")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<ExpenseResponseDto>> filter(
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam(required = false) ExpenseStatus status,
+            @RequestParam(required = false) Long travelId,
+            @RequestParam(required = false) LocalDateTime fromDate,
+            @RequestParam(required = false) LocalDateTime toDate) {
+        return ResponseEntity.ok(expenseService.getFiltered(employeeId, status, travelId,fromDate,toDate));
     }
 }

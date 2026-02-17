@@ -11,6 +11,7 @@ import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanParticipantRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanRepository;
+import com.capestone.hrms_backend.service.INotificationService;
 import com.capestone.hrms_backend.service.ITravelPlanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     private final EmployeeRepository employeeRepository;
     private final TravelPlanParticipantRepository participantRepo;
     private final ModelMapper modelMapper;
+    private final INotificationService notificationService;
 
     @Override
     public TravelPlanResponseDto create(TravelPlanRequestDto request, Long employeeId) {
@@ -47,6 +49,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
         plan.setDestination(request.getDestination());
         plan.setDepatureDate(request.getDepartureDate());
         plan.setReturnDate(request.getReturnDate());
+        plan.setMaxPerDayAmount(request.getMaxPerDayAmount());
         plan.setCreatedBy(hr);
 
         travelPlanRepository.save(plan);
@@ -68,10 +71,20 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     }
 
     @Override
-    public TravelPlanResponseDto getTravel(Long travelPlanId) {
-        TravelPlan plan = travelPlanRepository.findById(travelPlanId).orElseThrow(()->new ResourceNotFoundException("Travel plan doesn't exist"));
-        return modelMapper.map(plan,TravelPlanResponseDto.class);
+    public TravelPlanResponseDto getTravel(Long travelPlanId, Long empId, String role) {
+        TravelPlan plan = travelPlanRepository.findById(travelPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("Travel plan doesn't exist"));
+
+        boolean isHr = "HR".equalsIgnoreCase(role);
+        boolean isParticipant = participantRepo.findByTravelPlanIdAndEmployeeId(travelPlanId, empId).isPresent();
+        boolean isCreator = plan.getCreatedBy() != null && plan.getCreatedBy().getId().equals(empId);
+        if (!isHr && !isParticipant && !isCreator) {
+            throw new BusinessException("You are not authorized to view this travel plan");
+        }
+
+        return modelMapper.map(plan, TravelPlanResponseDto.class);
     }
+
 
     @Override
     public void addParticipants(Long travelPlanId, List<Long> empIds) {
@@ -93,6 +106,16 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
             participant.setEmployee(emp);
             log.info("employee: {}",participant.getEmployee().getId());
             participantRepo.save(participant);
+
+            String subject = "Travel Assigned: " + plan.getTitle();
+            String body = String.format(
+                    "You have been assigned to travel \"%s\" to %s (Departure: %s, Return: %s).",
+                    plan.getTitle(),
+                    plan.getDestination(),
+                    plan.getDepatureDate(),
+                    plan.getReturnDate()
+            );
+            notificationService.create(emp.getId(), subject, body);
         }
     }
 

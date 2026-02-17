@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,6 +24,8 @@ public class TravelPlanRequestDto {
     @NotNull(message = "Departure date is required")
     @FutureOrPresent(message = "Departure cannot be past date")
     private LocalDateTime departureDate;
+
+    private BigDecimal maxPerDayAmount;
 
     @FutureOrPresent(message = "Return date cannot be past date")
     private LocalDateTime returnDate;
