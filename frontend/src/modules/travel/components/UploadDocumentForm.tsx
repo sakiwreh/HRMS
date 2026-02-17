@@ -27,8 +27,8 @@ export default function UploadDocumentForm({ travelId, onSuccess }: Props) {
  
     const form = new FormData();
     form.append("file", data.file[0]);
-    form.append("title", data.title);
-    form.append("type", data.type);
+    form.append("description", data.title);
+    form.append("docType", data.type);
  
     if (data.uploadedFor)
       form.append("uploadedFor", data.uploadedFor);

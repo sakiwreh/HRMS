@@ -19,7 +19,6 @@ export default function TravelTabs({ travel }: Props) {
  
   return (
     <div className="bg-white rounded shadow">
-      {/* Tabs Header */}
       <div className="flex gap-6 border-b px-6 pt-4">
         <button className={tabClass("overview")} onClick={() => setActive("overview")}>
           Overview
@@ -31,12 +30,10 @@ export default function TravelTabs({ travel }: Props) {
           Documents
         </button>
       </div>
- 
-      {/* Tabs Content */}
       <div className="p-6">
         {active === "overview" && <OverviewTab travel={travel} />}
         {active === "participants" && <ParticipantsTab travel={travel} />}
-        {active === "documents" && <DocumentsTab travelId={travel.id} />}
+        {active === "documents" && <DocumentsTab travel={travel} />}
       </div>
     </div>
   );
