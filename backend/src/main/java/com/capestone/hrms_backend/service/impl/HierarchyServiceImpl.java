@@ -52,6 +52,11 @@ public class HierarchyServiceImpl implements IHierarchyService {
     }
 
     @Override
+    public List<Employee> getOrganization() {
+        return employeeRepository.findByManagerIsNull();
+    }
+
+    @Override
     public void allocateManager(Long empId, Long managerId) {
         Employee emp = employeeRepository.findById(empId).orElseThrow(()->new ResourceNotFoundException("Employee doesn't exist"));
         Employee mgr = employeeRepository.findById(managerId).orElseThrow(()->new ResourceNotFoundException("Manager doesn't exist"));

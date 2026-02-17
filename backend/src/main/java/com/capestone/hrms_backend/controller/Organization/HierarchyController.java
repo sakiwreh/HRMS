@@ -2,6 +2,7 @@ package com.capestone.hrms_backend.controller.Organization;
 
 import com.capestone.hrms_backend.dto.response.EmployeeShorterResponseDto;
 import com.capestone.hrms_backend.dto.response.OrgChartRespnseDto;
+import com.capestone.hrms_backend.entity.organization.Employee;
 import com.capestone.hrms_backend.security.HrmsUserDetails;
 import com.capestone.hrms_backend.service.IHierarchyService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class HierarchyController {
     public ResponseEntity<String> allocateManager(@PathVariable Long empId,@PathVariable Long mgrId){
         hierarchyService.allocateManager(empId,mgrId);
         return ResponseEntity.ok("Manager assigned!");
+    }
+
+    @GetMapping("/hierarchy")
+    public List<Employee> getHierarchy(){
+        return hierarchyService.getOrganization();
     }
 }
