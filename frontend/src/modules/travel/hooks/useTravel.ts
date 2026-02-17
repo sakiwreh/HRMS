@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchTravelById } from "../api/travelApi";
  
-export default function useTravel(id: string) {
+export default function useTravel(id?: string) {
   return useQuery({
     queryKey: ["travel", id],
-    queryFn: () => fetchTravelById(id),
+    queryFn: () => fetchTravelById(Number(id)),
     enabled: !!id,
   });
 }

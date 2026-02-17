@@ -1,36 +1,63 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import useTravels from "../hooks/useTravels";
+import { useState } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import CreateTravelForm from "../components/CreateTravelForm";
+import Modal from "../../../shared/components/Modal";
  
 export default function TravelListPage() {
   const { data, isLoading } = useTravels();
-  const user = useAppSelector(s => s.auth.user);
+  const user = useAppSelector((s) => s.auth.user);
+ 
+  const [open, setOpen] = useState(false);
  
   if (isLoading) return <div>Loading...</div>;
  
   return (
-    <div>
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-semibold">Travel Plans</h2>
+    <div className="space-y-4">
  
-        {user?.role === "HR" && <CreateTravelForm />}
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-semibold">Travel Plans</h1>
+ 
+        {user?.role === "HR" && (
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            + Create Travel
+          </button>
+        )}
       </div>
  
-      <div className="bg-white rounded shadow divide-y">
+      {/* LIST */}
+      <div className="bg-white rounded-xl shadow divide-y">
         {data?.map((t: any) => (
-          <Link
+          <NavLink
             key={t.id}
             to={`/dashboard/travel/${t.id}`}
-            className="block p-4 hover:bg-gray-50"
+            className={({ isActive }) =>
+              `block p-4 transition ${
+                isActive ? "bg-blue-50" : "hover:bg-gray-50"
+              }`
+            }
           >
-            <div className="font-medium">{t.title}</div>
+            <div className="font-medium text-gray-800">{t.title}</div>
             <div className="text-sm text-gray-500">
-              {t.destination} | {t.departureDate} → {t.returnDate}
+              {t.destination} • {t.departureDate} → {t.returnDate}
             </div>
-          </Link>
+          </NavLink>
         ))}
       </div>
+ 
+      {/* MODAL */}
+      <Modal
+        title="Create Travel Plan"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <CreateTravelForm />
+      </Modal>
     </div>
   );
 }

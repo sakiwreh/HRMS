@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,6 +49,9 @@ public class Employee extends Base {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Employee manager;
+
+    @OneToMany(mappedBy = "manager",cascade = CascadeType.ALL)
+    private List<Employee> juniors;
 
     //M:1
     @ManyToOne(fetch = FetchType.LAZY)
