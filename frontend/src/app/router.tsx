@@ -5,8 +5,9 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import DashboardPage from "../modules/dashboard/pages/DashboardPage";
 import TravelListPage from "../modules/travel/pages/TravelListPage";
 import TravelDetailsPage from "../modules/travel/pages/TravelDetailsPage";
+import MyExpensesPage from "../modules/expense/pages/MyExpensePage";
+import ExpenseReviewPage from "../modules/expense/pages/ExpenseReviewPage";
 export const router = createBrowserRouter([
-  /* ---------- PUBLIC ---------- */
   {
     path: "/",
     element: <Navigate to="/login" replace />,
@@ -15,8 +16,6 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
- 
-  /* ---------- PROTECTED ---------- */
   {
     path: "/dashboard",
     element: (
@@ -26,7 +25,6 @@ export const router = createBrowserRouter([
     ),
  
     children: [
-      /* Default dashboard */
       {
         index: true,
         element: <DashboardPage />,
@@ -41,6 +39,20 @@ export const router = createBrowserRouter([
           {
             path: ":id",
             element: <TravelDetailsPage />,
+          },
+        ],
+      },
+      // Expenses
+      {
+        path:"expenses",
+        children:[
+          {
+            index:true,
+            element: <MyExpensesPage/>
+          },
+          {
+            path:"review",
+            element:<ExpenseReviewPage/>
           },
         ],
       },

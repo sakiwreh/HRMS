@@ -1,13 +1,19 @@
 import { NavLink } from "react-router-dom";
 import useTravels from "../hooks/useTravels";
+import useMyTravels from "../hooks/useMyTravels";
 import { useState } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import CreateTravelForm from "../components/CreateTravelForm";
 import Modal from "../../../shared/components/Modal";
  
 export default function TravelListPage() {
-  const { data, isLoading } = useTravels();
   const user = useAppSelector((s) => s.auth.user);
+  const isHR = user?.role === "HR";
+ 
+  const allTravels = useTravels(isHR);
+  const myTravels = useMyTravels(!isHR);
+ 
+  const { data, isLoading } = isHR ? allTravels : myTravels;
  
   const [open, setOpen] = useState(false);
  
@@ -15,12 +21,13 @@ export default function TravelListPage() {
  
   return (
     <div className="space-y-4">
- 
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Travel Plans</h1>
+        <h1 className="text-xl font-semibold">
+          {isHR ? "Travel Plans" : "My Travels"}
+        </h1>
  
-        {user?.role === "HR" && (
+        {isHR && (
           <button
             onClick={() => setOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
@@ -32,6 +39,12 @@ export default function TravelListPage() {
  
       {/* LIST */}
       <div className="bg-white rounded-xl shadow divide-y">
+        {data?.length === 0 && (
+          <div className="p-6 text-center text-gray-400">
+            No travel plans found
+          </div>
+        )}
+ 
         {data?.map((t: any) => (
           <NavLink
             key={t.id}
@@ -42,7 +55,14 @@ export default function TravelListPage() {
               }`
             }
           >
-            <div className="font-medium text-gray-800">{t.title}</div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-800">{t.title}</span>
+              {t.cancelled && (
+                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                  Cancelled
+                </span>
+              )}
+            </div>
             <div className="text-sm text-gray-500">
               {t.destination} • {t.departureDate} → {t.returnDate}
             </div>
@@ -61,4 +81,3 @@ export default function TravelListPage() {
     </div>
   );
 }
- 

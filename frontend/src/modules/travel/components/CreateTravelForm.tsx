@@ -8,6 +8,7 @@ type TravelForm = {
   destination: string;
   departureDate: string;
   returnDate: string;
+  maxPerDayAmount?: string;
 };
  
 export default function CreateTravelForm() {
@@ -29,7 +30,10 @@ export default function CreateTravelForm() {
   });
  
   const onSubmit = (data: TravelForm) => {
-    mutation.mutate(data);
+    mutation.mutate({
+      ...data,
+      maxPerDayAmount: data.maxPerDayAmount ? Number(data.maxPerDayAmount): undefined,
+    })
   };
  
   return (
@@ -67,10 +71,16 @@ export default function CreateTravelForm() {
         {...register("returnDate", { required: true })}
       />
     </div>
+
+    <input
+    type="number"
+    step="0.01"
+    className="border p-2 w-full rounded"
+    placeholder="Max Amout/Day (optional)"/>
  
-    <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded w-full">
-      Create Travel Plan
-    </button>
+    <button type="submit" disabled={mutation.isPending} className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded w-full disabled:opacity-50">
+        {mutation.isPending ? "Creating..." : "Create Travel Plan"}
+</button>
   </form>
 );
 }
