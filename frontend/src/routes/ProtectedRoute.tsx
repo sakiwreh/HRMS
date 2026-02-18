@@ -5,7 +5,7 @@ export default function ProtectedRoute({ children }: { children: any }) {
   const reduxUser = useAppSelector(state => state.auth.user);
   const localUser = localStorage.getItem("auth_user");
  
-  // if both missing → not authenticated
+  // if both missing, not authenticated
   if (!reduxUser && !localUser)
     return <Navigate to="/login" replace />;
  

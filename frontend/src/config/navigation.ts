@@ -13,7 +13,6 @@ export const navigation: Record<Role, NavItem[]> = {
     { label: "Jobs", path: "/dashboard/jobs" },
     { label: "Organization", path: "/dashboard/org" },
     { label: "Games", path: "/dashboard/games" },
-    { label: "Notifications", path: "/dashboard/notifications" },
   ],
  
   MANAGER: [
@@ -21,7 +20,6 @@ export const navigation: Record<Role, NavItem[]> = {
     { label: "Team Travels", path: "/dashboard/travel" },
     { label: "Expense Review", path: "/dashboard/expenses/review" },
     { label: "Organization", path: "/dashboard/org" },
-    { label: "Notifications", path: "/dashboard/notifications" },
   ],
  
   EMPLOYEE: [
@@ -29,6 +27,5 @@ export const navigation: Record<Role, NavItem[]> = {
     { label: "My Travels", path: "/dashboard/travel" },
     { label: "My Expenses", path: "/dashboard/expenses" },
     { label: "Games", path: "/dashboard/games" },
-    { label: "Notifications", path: "/dashboard/notifications" },
   ],
 };

@@ -11,15 +11,12 @@ export default function TravelDetailsPage() {
  
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-white p-6 rounded shadow">
         <h1 className="text-2xl font-semibold">{data.title}</h1>
         <p className="text-gray-500">
           {data.destination} • {data.departureDate} → {data.returnDate}
         </p>
       </div>
- 
-      {/* Tabs */}
       <TravelTabs travel={data} />
     </div>
   );

@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { clearUser } from "../../../modules/auth/authSlice";
+import NotificationBell from "../NotificationBell";
  
 export default function Header() {
   const user = useAppSelector(state => state.auth.user);
@@ -19,6 +20,7 @@ export default function Header() {
       <div className="font-semibold">Welcome, {user?.name}</div>
  
       <div className="flex items-center gap-4">
+        <NotificationBell/>
         <span className="text-sm text-gray-500">{user?.role}</span>
         <button
           onClick={logout}
