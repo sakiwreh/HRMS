@@ -8,5 +8,5 @@ import lombok.Setter;
 public class EmployeeShorterResponseDto {
     private Long id;
     private String name;
-    private String desgination;
+    private String designation;
 }

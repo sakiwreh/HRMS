@@ -67,6 +67,16 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
         TravelPlan plan = travelPlanRepository.findById(planId).orElseThrow(()->new ResourceNotFoundException("Travel Not Found"));
         plan.setCancelled(true);
         travelPlanRepository.save(plan);
+
+        //Notify about cancellation
+        participantRepo.findByTravelPlanId(planId).forEach(tp -> {
+            String subject = "Travel Cancelled: " + plan.getTitle();
+            String body = String.format(
+                    "The travel plan \"%s\" to %s (Departure: %s, Return: %s) has been cancelled.",
+                    plan.getTitle(), plan.getDestination(),
+                    plan.getDepatureDate(), plan.getReturnDate());
+            notificationService.create(tp.getEmployee().getId(), subject, body);
+        });
         return modelMapper.map(plan,TravelPlanResponseDto.class);
     }
 
@@ -107,6 +117,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
             log.info("employee: {}",participant.getEmployee().getId());
             participantRepo.save(participant);
 
+            //Notify about travel assignment to employee
             String subject = "Travel Assigned: " + plan.getTitle();
             String body = String.format(
                     "You have been assigned to travel \"%s\" to %s (Departure: %s, Return: %s).",

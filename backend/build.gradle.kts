@@ -42,6 +42,7 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	// Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 }
 
 tasks.withType<Test> {
