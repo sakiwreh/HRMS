@@ -11,6 +11,7 @@ import com.capestone.hrms_backend.repository.job.JobOpeningRepository;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.referral.JobReferralRepository;
 import com.capestone.hrms_backend.repository.referral.JobShareRepository;
+import com.capestone.hrms_backend.service.IEmailService;
 import com.capestone.hrms_backend.service.IJobReferralService;
 import com.capestone.hrms_backend.service.INotificationService;
 import com.capestone.hrms_backend.service.storage.FileStorageService;
@@ -18,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,13 +34,26 @@ public class JobReferralServiceImpl implements IJobReferralService {
     private final JobOpeningRepository jobRepository;
     private final FileStorageService fileStorageService;
     private final INotificationService notificationService;
+    private final IEmailService emailService;
 
     @Override
     public void shareJob(Long jobId, Long empId,JobshareRequestDto dto) {
         JobShare share = modelMapper.map(dto, JobShare.class);
         share.setSharedBy(employeeRepository.findById(empId).orElseThrow(()->new ResourceNotFoundException("Employee not present")));
         share.setJob(jobRepository.findById(jobId).orElseThrow(()->new ResourceNotFoundException("Job not found")));
-        //Send email later from here
+        //Sending email
+        String jobTitle = share.getJob().getTitle();
+        String shareSubject = "Job Opportunity: " + jobTitle;
+        String shareBody = String.format(
+                "Greetings!!,%n%nCheck out this job opening:%n%nTitle: %s%n%nDescription: %s%n%nExperience Required: %.1f years%n%nShared by employee at the organization.",
+                jobTitle, share.getJob().getDescription(), share.getJob().getExperienceRequired());
+        File jdFile = new File(share.getJob().getJobDescriptionUrl());
+        if (jdFile.exists()) {
+            emailService.sendWithAttachment(dto.getCandidateEmail(), shareSubject, shareBody, jdFile);
+        } else {
+            emailService.send(dto.getCandidateEmail(), shareSubject, shareBody);
+        }
+
         jobShareRepository.save(share);
     }
 
@@ -59,6 +75,30 @@ public class JobReferralServiceImpl implements IJobReferralService {
                     referral.getCandidateFullName(),
                     referral.getJob().getTitle());
             notificationService.create(referral.getJob().getCreatedBy().getId(), subject, body);
+
+            String referralSubject = "New Referral: " + referral.getCandidateFullName() + " for " + referral.getJob().getTitle();
+            String referralBody = String.format(
+                    "A new candidate has been referred for the position \"%s\".%n%n" +
+                            "Referrer: %s %s%n" +
+                            "Candidate: %s%n" +
+                            "Email: %s%n" +
+                            "Phone: %s%n" +
+                            "Notes: %s",
+                    referral.getJob().getTitle(),
+                    referral.getReferrer().getFirstName(), referral.getReferrer().getLastName(),
+                    referral.getCandidateFullName(),
+                    referral.getEmail(),
+                    referral.getCandidatePhoneNumber() != null ? referral.getCandidatePhoneNumber() : "N/A",
+                    referral.getNotes() != null ? referral.getNotes() : "N/A");
+
+            List<String> recipients = new ArrayList<>();
+            recipients.add(referral.getJob().getCommunicationEmail());
+            if (referral.getJob().getCreatedBy().getUser() != null) {
+                recipients.add(referral.getJob().getCreatedBy().getUser().getEmail());
+            }
+
+            File cvFile = referral.getCandidateCvLink() != null ? new File(referral.getCandidateCvLink()) : null;
+            emailService.sendWithAttachment(recipients, referralSubject, referralBody, cvFile);
         }
 
     }

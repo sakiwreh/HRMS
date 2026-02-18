@@ -14,7 +14,7 @@ export default function TravelDetailsPage() {
       <div className="bg-white p-6 rounded shadow">
         <h1 className="text-2xl font-semibold">{data.title}</h1>
         <p className="text-gray-500">
-          {data.destination} • {data.departureDate} → {data.returnDate}
+          {data.destination} | {data.departureDate} -- {data.returnDate}
         </p>
       </div>
       <TravelTabs travel={data} />

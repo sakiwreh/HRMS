@@ -16,6 +16,7 @@ import com.capestone.hrms_backend.repository.expense.ExpenseRepository;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanParticipantRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanRepository;
+import com.capestone.hrms_backend.service.IEmailService;
 import com.capestone.hrms_backend.service.IExpenseService;
 import com.capestone.hrms_backend.service.INotificationService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class ExpenseServiceImpl implements IExpenseService {
     private final TravelPlanParticipantRepository participantRepository;
     private final ModelMapper modelMapper;
     private final INotificationService notificationService;
+    private final IEmailService emailService;
 
     @Override
     public ExpenseResponseDto create(Long empId, ExpenseRequestDto requestDto) {
@@ -86,13 +88,18 @@ public class ExpenseServiceImpl implements IExpenseService {
         repo.save(e);
 
         //Notify HR
+        String subject = "New Expense Submitted: " + e.getDescription();
+        String body = String.format(
+                "%s %s submitted an expense of %s for travel \"%s\" — %s.",
+                emp.getFirstName(), emp.getLastName(),
+                e.getAmount(), plan.getTitle(), e.getDescription());
         if (plan.getCreatedBy() != null) {
-            String subject = "New Expense Submitted: " + e.getDescription();
-            String body = String.format(
-                    "%s %s submitted an expense of %s for travel \"%s\" — %s.",
-                    emp.getFirstName(), emp.getLastName(),
-                    e.getAmount(), plan.getTitle(), e.getDescription());
             notificationService.create(plan.getCreatedBy().getId(), subject, body);
+        }
+
+        //Send email to HR
+        if(plan.getCreatedBy().getUser()!=null && plan.getCreatedBy().getUser().getEmail()!=null){
+            emailService.send(plan.getCreatedBy().getUser().getEmail(),subject,body);
         }
 
         ExpenseResponseDto dto = modelMapper.map(e,ExpenseResponseDto.class);

@@ -17,7 +17,7 @@ export const navigation: Record<Role, NavItem[]> = {
  
   MANAGER: [
     { label: "Dashboard", path: "/dashboard" },
-    { label: "Team Travels", path: "/dashboard/travel" },
+    { label: "My Travels", path: "/dashboard/travel" },
     { label: "Expense Review", path: "/dashboard/expenses/review" },
     { label: "Organization", path: "/dashboard/org" },
   ],

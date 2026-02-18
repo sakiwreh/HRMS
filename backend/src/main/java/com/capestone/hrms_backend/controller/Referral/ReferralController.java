@@ -21,13 +21,13 @@ import java.util.List;
 public class ReferralController {
     private final IJobReferralService jobReferralService;
 
-    @PostMapping(value = "/job/{id}/share",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/job/{id}/share")
     public ResponseEntity<String> share(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @RequestBody JobshareRequestDto dto) {
         jobReferralService.shareJob(id, user.getEmpId(), dto);
         return ResponseEntity.ok("Job shared successfully");
     }
 
-    @PostMapping("/job/{id}/reffer")
+    @PostMapping(value = "/job/{id}/reffer",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> reffer(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @ModelAttribute JobReferralRequestDto dto) throws IOException {
         jobReferralService.referCandidate(id, user.getEmpId(), dto);
         return ResponseEntity.ok("Candidate referred for job.");

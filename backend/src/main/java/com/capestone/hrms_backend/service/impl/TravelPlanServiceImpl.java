@@ -11,6 +11,7 @@ import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanParticipantRepository;
 import com.capestone.hrms_backend.repository.travel.TravelPlanRepository;
+import com.capestone.hrms_backend.service.IEmailService;
 import com.capestone.hrms_backend.service.INotificationService;
 import com.capestone.hrms_backend.service.ITravelPlanService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     private final TravelPlanParticipantRepository participantRepo;
     private final ModelMapper modelMapper;
     private final INotificationService notificationService;
+    private final IEmailService emailService;
 
     @Override
     public TravelPlanResponseDto create(TravelPlanRequestDto request, Long employeeId) {
@@ -97,6 +99,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
 
 
     @Override
+    @Transactional
     public void addParticipants(Long travelPlanId, List<Long> empIds) {
         //Fetch travel plan
         TravelPlan plan = travelPlanRepository.findById(travelPlanId).orElseThrow(()->new ResourceNotFoundException("Travel plan not found."));
@@ -126,7 +129,12 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
                     plan.getDepatureDate(),
                     plan.getReturnDate()
             );
+
+            //Send email for travel assignment to employee
             notificationService.create(emp.getId(), subject, body);
+            if(emp.getUser()!=null && emp.getUser().getEmail()!=null){
+                emailService.send(emp.getUser().getEmail(),subject,body);
+            }
         }
     }
 
