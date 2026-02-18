@@ -28,8 +28,8 @@ export default function AssignParticipants({ travelId }: Props) {
   });
  
   const selected = watch("employeeIds");
- 
-  /* ---------------- PRESELECT EXISTING PARTICIPANTS ---------------- */
+
+  //Existing participants
   useEffect(() => {
     if (!employees.length || !existingParticipants.length) return;
  
@@ -40,8 +40,6 @@ export default function AssignParticipants({ travelId }: Props) {
     setValue("employeeIds", ids, { shouldValidate: true });
  
   }, [existingParticipants, employees, setValue]);
- 
-  /* ---------------- SUBMIT ---------------- */
   const onSubmit = async (data: FormData) => {
     try {
       await mutateAsync({

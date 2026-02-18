@@ -1,25 +1,15 @@
 import { NavLink } from "react-router-dom";
- 
-const menu = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "Travel Plans", path: "/dashboard/travel" },
-  { name: "Expense Review", path: "/dashboard/expenses" },
-  { name: "Jobs", path: "/dashboard/jobs" },
-  { name: "Organization", path: "/dashboard/org" },
-  { name: "Games", path: "/dashboard/games" },
-  { name: "Notifications", path: "/dashboard/notifications" },
-];
+import { useAppSelector } from "../../../store/hooks";
+import { navigation, type Role } from "../../../config/navigation";
  
 export default function Sidebar() {
+  const user = useAppSelector((s) => s.auth.user);
+  const role = (user?.role ?? "EMPLOYEE") as Role;
+  const menu = navigation[role];
+ 
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
- 
-      {/* Logo */}
-      <div className="px-6 py-5 text-xl font-bold border-b">
-        HRMS
-      </div>
- 
-      {/* Menu */}
+      <div className="px-6 py-5 text-xl font-bold border-b">HRMS</div>
       <nav className="flex-1 p-3 space-y-1">
         {menu.map((item) => (
           <NavLink
@@ -37,16 +27,11 @@ export default function Sidebar() {
               `
             }
           >
-            {item.name}
+            {item.label}
           </NavLink>
         ))}
       </nav>
- 
-      {/* Footer user */}
-      <div className="p-4 border-t text-xs text-gray-400">
-        HRMS v1.0
-      </div>
+      <div className="p-4 border-t text-xs text-gray-400">HRMS v1.0</div>
     </aside>
   );
 }
- 

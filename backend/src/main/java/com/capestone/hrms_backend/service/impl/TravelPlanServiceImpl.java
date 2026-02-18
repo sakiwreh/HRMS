@@ -140,7 +140,7 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     public List<TravelPlanResponseDto> getMyTravels(Long empId) {
         return participantRepo.findByEmployeeId(empId)
                 .stream()
-                .map(tp -> modelMapper.map(tp, TravelPlanResponseDto.class))
+                .map(tp -> modelMapper.map(tp.getTravelPlan(), TravelPlanResponseDto.class))
                 .toList();
     }
 }

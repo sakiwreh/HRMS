@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useAppSelector } from "../../../../store/hooks";
 import useDocuments from "../../hooks/useDocuments";
+import useDeleteDocument from "../../hooks/useDeleteDocument";
 import Modal from "../../../../shared/components/Modal";
 import UploadDocumentForm from "../UploadDocumentForm";
 import { previewDocument, downloadDocument } from "../../util/documentActions";
@@ -10,13 +12,20 @@ type Props = {
  
 export default function DocumentsTab({ travel }: Props) {
   const travelId = travel?.id;
+  const user = useAppSelector((s) => s.auth.user);
   const { data: documents = [], isLoading } = useDocuments(travelId);
+  const deleteMutation = useDeleteDocument(travelId);
   const [open, setOpen] = useState(false);
  
   if (!travelId) return null;
  
   if (isLoading)
     return <div className="text-gray-500">Loading documents...</div>;
+ 
+  const handleDelete = (docId: number) => {
+    if (!confirm("Delete this document?")) return;
+    deleteMutation.mutate(docId);
+  };
  
   return (
     <div className="space-y-5">
@@ -38,14 +47,15 @@ export default function DocumentsTab({ travel }: Props) {
         )}
  
         {documents.map((doc: any) => (
-          <DocumentCard key={doc.id} doc={doc} />
+          <DocumentCard
+            key={doc.id}
+            doc={doc}
+            canDelete={user?.role === "HR" || doc.uploadedBy === user?.id}
+            onDelete={() => handleDelete(doc.id)}
+          />
         ))}
       </div>
-      <Modal
-        title="Upload Document"
-        open={open}
-        onClose={() => setOpen(false)}
-      >
+      <Modal title="Upload Document" open={open} onClose={() => setOpen(false)}>
         <UploadDocumentForm
           travelId={travelId}
           onSuccess={() => setOpen(false)}
@@ -55,7 +65,15 @@ export default function DocumentsTab({ travel }: Props) {
   );
 }
  
-function DocumentCard({ doc }: { doc: any }) {
+function DocumentCard({
+  doc,
+  canDelete,
+  onDelete,
+}: {
+  doc: any;
+  canDelete: boolean;
+  onDelete: () => void;
+}) {
   return (
     <div className="border rounded-md p-4 flex justify-between items-center bg-white shadow-sm">
       <div className="space-y-1">
@@ -63,16 +81,13 @@ function DocumentCard({ doc }: { doc: any }) {
           {doc.description || doc.fileName}
         </div>
  
-        <div className="text-xs text-gray-500">
-          {doc.docType}
-        </div>
+        <div className="text-xs text-gray-500">{doc.docType}</div>
  
         <div className="text-xs text-gray-400">
           {(doc.fileSize / 1024).toFixed(1)} KB
         </div>
       </div>
       <div className="flex gap-4">
- 
         <button
           type="button"
           onClick={() => previewDocument(doc.id)}
@@ -89,6 +104,15 @@ function DocumentCard({ doc }: { doc: any }) {
           Download
         </button>
  
+        {canDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="text-red-600 text-sm hover:underline"
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ package com.capestone.hrms_backend.repository.travel;
 
 import com.capestone.hrms_backend.entity.travel.TravelPlanParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,5 +13,7 @@ public interface TravelPlanParticipantRepository extends JpaRepository<TravelPla
     List<TravelPlanParticipant> findByTravelPlanId(Long travelId);
     Optional<TravelPlanParticipant> findByTravelPlanIdAndEmployeeId(Long travelId,Long empId);
     void deleteByTravelPlanIdAndEmployeeId(Long travelId, Long empId);
+
+    @Query("select p from TravelPlanParticipant p join fetch p.travelPlan tp join fetch tp.createdBy where p.employee.id = :empId")
     List<TravelPlanParticipant> findByEmployeeId(Long empId);
 }

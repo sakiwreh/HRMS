@@ -8,3 +8,5 @@ export default function RoleRoute({ children, roles }: any) {
  
   return children;
 }
+
+//Safe to delete
