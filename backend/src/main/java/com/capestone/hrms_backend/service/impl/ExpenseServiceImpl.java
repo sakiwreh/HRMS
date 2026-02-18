@@ -57,13 +57,14 @@ public class ExpenseServiceImpl implements IExpenseService {
         //Get Category
         ExpenseCategory category = expenseCategoryRepository.findById(requestDto.getCategoryId()).orElseThrow(()->new ResourceNotFoundException("Choose valid expense category"));
 
-        //Validation: Expense Date
-        if(requestDto.getExpenseDate().isBefore(plan.getDepatureDate())) throw new BusinessException("Expense must be filed for travel duration only.");
+        //Validation related to dates
+        if(requestDto.getExpenseDate().isBefore(plan.getDepatureDate()) || requestDto.getExpenseDate().isAfter(plan.getReturnDate())) throw new BusinessException("Expense must be filed for travel duration only.");
 
         if(LocalDateTime.now().isAfter(plan.getReturnDate().plusDays(10))) throw new BusinessException("Expense window closed");
 
-        if(requestDto.getExpenseDate().isAfter(plan.getReturnDate())) throw new BusinessException("Expense date cannot be after travel date.");
+        if(LocalDateTime.now().isBefore(plan.getDepatureDate())) throw new BusinessException("You can start filing expense after start date");
 
+        //Validation for macx limit per day
         if (plan.getMaxPerDayAmount() != null) {
             LocalDateTime dayStart = requestDto.getExpenseDate().toLocalDate().atStartOfDay();
             LocalDateTime dayEnd = dayStart.plusDays(1);
@@ -83,6 +84,16 @@ public class ExpenseServiceImpl implements IExpenseService {
         e.setDescription(requestDto.getDescription());
         e.setExpenseDate(requestDto.getExpenseDate());
         repo.save(e);
+
+        //Notify HR
+        if (plan.getCreatedBy() != null) {
+            String subject = "New Expense Submitted: " + e.getDescription();
+            String body = String.format(
+                    "%s %s submitted an expense of %s for travel \"%s\" — %s.",
+                    emp.getFirstName(), emp.getLastName(),
+                    e.getAmount(), plan.getTitle(), e.getDescription());
+            notificationService.create(plan.getCreatedBy().getId(), subject, body);
+        }
 
         ExpenseResponseDto dto = modelMapper.map(e,ExpenseResponseDto.class);
         dto.setCategory(e.getCategory().getName());

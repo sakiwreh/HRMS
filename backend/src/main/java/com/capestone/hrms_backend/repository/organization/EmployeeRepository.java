@@ -27,4 +27,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     """)
     List<EmployeeLookupDto> findEmployeeLookup();
 
+    List<Employee> findByRoleNameIgnoreCase(String rolename);
 }

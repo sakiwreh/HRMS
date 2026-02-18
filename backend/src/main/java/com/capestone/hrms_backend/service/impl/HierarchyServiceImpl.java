@@ -1,7 +1,8 @@
 package com.capestone.hrms_backend.service.impl;
 
 import com.capestone.hrms_backend.dto.response.EmployeeShorterResponseDto;
-import com.capestone.hrms_backend.dto.response.OrgChartRespnseDto;
+import com.capestone.hrms_backend.dto.response.OrgNodeResponseDto;
+import com.capestone.hrms_backend.dto.response.OrgNodeResponseDto.EmployeeNodeDto;
 import com.capestone.hrms_backend.entity.organization.Employee;
 import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
@@ -10,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,60 +23,57 @@ public class HierarchyServiceImpl implements IHierarchyService {
 
     @Override
     public List<EmployeeShorterResponseDto> getMyDirectTeam(Long empId) {
-        return employeeRepository.findByManagerId(empId).stream().map(m->modelMapper.map(m,EmployeeShorterResponseDto.class)).toList();
+        return employeeRepository.findByManagerId(empId).stream()
+                .map(this::toShorterDto)
+                .toList();
     }
 
     @Override
-    public List<EmployeeShorterResponseDto> getMyFullTeam(Long empId) {
-        Set<Employee> visited = new HashSet<>();
-        Queue<Long> queue = new LinkedList<>();
+    public OrgNodeResponseDto getOrgChartView(Long empId) {
+        Employee selected = employeeRepository.findById(empId).orElseThrow(() -> new ResourceNotFoundException("Employee not found."));
 
-        while(!queue.isEmpty()){
-            Long manager = queue.poll();
-
-            List<Employee> subs = employeeRepository.findByManagerId(manager);
-            for(Employee e : subs){
-                if(visited.add(e)){
-                    queue.add(e.getId());
-                }
-            }
+        //Build chain
+        List<EmployeeNodeDto> chain = new ArrayList<>();
+        chain.add(toNodeDto(selected));
+        Employee current = selected.getManager();
+        while (current != null) {
+            chain.add(toNodeDto(current));
+            current = current.getManager();
         }
-        return visited.stream().map(m->modelMapper.map(m,EmployeeShorterResponseDto.class)).toList();
-    }
+        //Reversing to build top to bottom
+        Collections.reverse(chain);
 
-    @Override
-    public OrgChartRespnseDto getOrgChart(Long empId) {
-        Employee root = employeeRepository.findById(empId).orElseThrow(()->new ResourceNotFoundException("Employee not found."));
-        while(root.getManager()!=null){
-            root=root.getManager();
-        }
+        //Immediate reports
+        List<EmployeeNodeDto> reports = employeeRepository.findByManagerId(empId).stream()
+                .map(this::toNodeDto)
+                .toList();
 
-        return generateTree(root);
-    }
-
-    @Override
-    public List<Employee> getOrganization() {
-        return employeeRepository.findByManagerIsNull();
+        return new OrgNodeResponseDto(toNodeDto(selected), chain, reports);
     }
 
     @Override
     public void allocateManager(Long empId, Long managerId) {
-        Employee emp = employeeRepository.findById(empId).orElseThrow(()->new ResourceNotFoundException("Employee doesn't exist"));
-        Employee mgr = employeeRepository.findById(managerId).orElseThrow(()->new ResourceNotFoundException("Manager doesn't exist"));
-
-        //If both found, allocate manager
+        Employee emp = employeeRepository.findById(empId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee doesn't exist"));
+        Employee mgr = employeeRepository.findById(managerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manager doesn't exist"));
         emp.setManager(mgr);
         employeeRepository.save(emp);
     }
 
-    public OrgChartRespnseDto generateTree(Employee emp){
-        OrgChartRespnseDto node = modelMapper.map(emp,OrgChartRespnseDto.class);
-        node.setName(emp.getFirstName()+" "+emp.getLastName());
+    private EmployeeNodeDto toNodeDto(Employee e) {
+        return new EmployeeNodeDto(
+                e.getId(),
+                e.getFirstName() + " " + e.getLastName(),
+                e.getDesignation(),
+                e.getDepartment() != null ? e.getDepartment().getName() : null);
+    }
 
-        List<Employee> subordinates = employeeRepository.findByManagerId(emp.getId());
-        for(Employee s : subordinates){
-            node.getSubordinates().add(generateTree(s));
-        }
-        return node;
+    private EmployeeShorterResponseDto toShorterDto(Employee e) {
+        EmployeeShorterResponseDto dto = new EmployeeShorterResponseDto();
+        dto.setId(e.getId());
+        dto.setName(e.getFirstName() + " " + e.getLastName());
+        dto.setDesignation(e.getDesignation());
+        return dto;
     }
 }

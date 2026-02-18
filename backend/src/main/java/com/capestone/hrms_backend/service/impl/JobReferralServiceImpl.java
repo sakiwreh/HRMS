@@ -12,6 +12,7 @@ import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
 import com.capestone.hrms_backend.repository.referral.JobReferralRepository;
 import com.capestone.hrms_backend.repository.referral.JobShareRepository;
 import com.capestone.hrms_backend.service.IJobReferralService;
+import com.capestone.hrms_backend.service.INotificationService;
 import com.capestone.hrms_backend.service.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,7 @@ public class JobReferralServiceImpl implements IJobReferralService {
     private final EmployeeRepository employeeRepository;
     private final JobOpeningRepository jobRepository;
     private final FileStorageService fileStorageService;
+    private final INotificationService notificationService;
 
     @Override
     public void shareJob(Long jobId, Long empId,JobshareRequestDto dto) {
@@ -47,6 +49,18 @@ public class JobReferralServiceImpl implements IJobReferralService {
         String path = fileStorageService.saveCv(jobId, dto.getFile());
         referral.setCandidateCvLink(path);
         referralRepository.save(referral);
+
+        //Notify HR about job referral
+        if (referral.getJob().getCreatedBy() != null) {
+            String subject = "New Referral for: " + referral.getJob().getTitle();
+            String body = String.format(
+                    "%s referred %s for the position \"%s\".",
+                    referral.getReferrer().getFirstName() + " " + referral.getReferrer().getLastName(),
+                    referral.getCandidateFullName(),
+                    referral.getJob().getTitle());
+            notificationService.create(referral.getJob().getCreatedBy().getId(), subject, body);
+        }
+
     }
 
     @Override
@@ -59,5 +73,15 @@ public class JobReferralServiceImpl implements IJobReferralService {
         JobReferral ref = referralRepository.findById(refId).orElseThrow(()->new ResourceNotFoundException("Referral not found!"));
         ref.setStatus(status);
         referralRepository.save(ref);
+
+        //Notify employee about status change in referral
+        String subject = "Referral Status Updated: " + ref.getCandidateFullName();
+        String body = String.format(
+                "Your referral for %s (position: \"%s\") has been updated to %s.",
+                ref.getCandidateFullName(),
+                ref.getJob().getTitle(),
+                status.name());
+        notificationService.create(ref.getReferrer().getId(), subject, body);
+
     }
 }

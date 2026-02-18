@@ -16,6 +16,6 @@ public class ExpenseResponseDto {
     private String description;
     private LocalDateTime expenseDate;
     private ExpenseStatus status;
-    private String reviewedBy;
+    private Long reviewedBy;
     private String remarks;
 }

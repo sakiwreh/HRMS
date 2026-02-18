@@ -1,6 +1,7 @@
 package com.capestone.hrms_backend.config;
 
 import com.capestone.hrms_backend.dto.response.*;
+import com.capestone.hrms_backend.entity.expense.Expense;
 import com.capestone.hrms_backend.entity.expense.ExpenseProof;
 import com.capestone.hrms_backend.entity.job.JobOpening;
 import com.capestone.hrms_backend.entity.travel.TravelDocument;
@@ -24,12 +25,19 @@ public class ModelMapperConfig {
                 .setSkipNullEnabled(true);
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
 
-        //HR id from:: TravelPlan to TravelResponseDto
+        //HR id from: TravelPlan to TravelResponseDto
         modelMapper.typeMap(TravelPlan.class, TravelPlanResponseDto.class)
                 .addMappings(m-> {
                     m.map(plan -> plan.getCreatedBy().getId(), TravelPlanResponseDto::setCreatedBy);
                     m.map(TravelPlan::getDepatureDate,TravelPlanResponseDto::setDepartureDate);
                 });
+
+        modelMapper.typeMap(Expense.class,ExpenseResponseDto.class)
+                        .addMappings(m->{
+                            m.map(exp -> exp.getEmployee().getId(),ExpenseResponseDto::setEmployeeId);
+                            m.map(exp->exp.getCategory().getName(),ExpenseResponseDto::setCategory);
+                            m.map(exp -> exp.getReviewedBy().getId(),ExpenseResponseDto::setReviewedBy);
+                        });
 
 //        modelMapper.typeMap(TravelDocument.class,TravelDocumentResponseDto.class)
 //                .addMappings(m->{

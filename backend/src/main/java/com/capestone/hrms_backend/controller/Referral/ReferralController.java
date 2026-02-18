@@ -1,4 +1,4 @@
-package com.capestone.hrms_backend.controller.Controller;
+package com.capestone.hrms_backend.controller.Referral;
 
 import com.capestone.hrms_backend.dto.request.JobReferralRequestDto;
 import com.capestone.hrms_backend.dto.request.JobshareRequestDto;
