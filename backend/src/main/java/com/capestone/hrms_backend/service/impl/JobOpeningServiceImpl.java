@@ -7,7 +7,6 @@ import com.capestone.hrms_backend.entity.job.JobCvReviewer;
 import com.capestone.hrms_backend.entity.job.JobOpening;
 import com.capestone.hrms_backend.entity.job.JobStatus;
 import com.capestone.hrms_backend.entity.organization.Employee;
-import com.capestone.hrms_backend.entity.travel.TravelPlanParticipant;
 import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.job.JobCvReviewerRepository;
 import com.capestone.hrms_backend.repository.job.JobOpeningRepository;
@@ -42,13 +41,17 @@ public class JobOpeningServiceImpl implements IJobOpeningService {
         job.setJobDescriptionUrl(path);
 
         jobOpeningRepository.save(job);
-        return modelMapper.map(job, JobOpeningResponseDto.class);
+        JobOpeningResponseDto response = modelMapper.map(job, JobOpeningResponseDto.class);
+        response.setCreatedByName(hr.getFirstName()+" "+hr.getLastName());
+        return response;
     }
 
     @Override
     public JobOpeningResponseDto getById(Long id) {
         JobOpening opening = jobOpeningRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Opening doesn't exist"));
-        return modelMapper.map(opening, JobOpeningResponseDto.class);
+        JobOpeningResponseDto response = modelMapper.map(opening, JobOpeningResponseDto.class);
+        response.setCreatedByName(opening.getCreatedBy().getFirstName()+" "+opening.getCreatedBy().getLastName());
+        return response;
     }
 
     @Override

@@ -27,8 +27,8 @@ public class ReferralController {
         return ResponseEntity.ok("Job shared successfully");
     }
 
-    @PostMapping(value = "/job/{id}/reffer",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> reffer(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @ModelAttribute JobReferralRequestDto dto) throws IOException {
+    @PostMapping(value = "/job/{id}/refer",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> refer(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @ModelAttribute JobReferralRequestDto dto) throws IOException {
         jobReferralService.referCandidate(id, user.getEmpId(), dto);
         return ResponseEntity.ok("Candidate referred for job.");
     }
@@ -38,10 +38,16 @@ public class ReferralController {
         return ResponseEntity.ok(jobReferralService.getMyReferrals(user.getEmpId()));
     }
 
-    @PatchMapping("/job/reffer/{id}")
+    @PatchMapping("/job/refer/{id}")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<String> updateStatus(@PathVariable Long id, @RequestBody ReferralStatus status) {
         jobReferralService.updateReferralStatus(id, status);
         return ResponseEntity.ok("Status updated!");
+    }
+
+    @GetMapping("/job/referrals/all")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<JobReferralResponseDto>> getAllReferrals(){
+        return ResponseEntity.ok(jobReferralService.getAllReferrals());
     }
 }

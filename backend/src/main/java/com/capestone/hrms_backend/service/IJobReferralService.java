@@ -13,4 +13,5 @@ public interface IJobReferralService {
     void referCandidate(Long jobId, Long empId,JobReferralRequestDto dto) throws IOException;
     List<JobReferralResponseDto> getMyReferrals(Long empId);
     void updateReferralStatus(Long refId, ReferralStatus status);
+    List<JobReferralResponseDto> getAllReferrals();
 }
