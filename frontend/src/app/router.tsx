@@ -7,6 +7,10 @@ import TravelListPage from "../modules/travel/pages/TravelListPage";
 import TravelDetailsPage from "../modules/travel/pages/TravelDetailsPage";
 import MyExpensesPage from "../modules/expense/pages/MyExpensePage";
 import ExpenseReviewPage from "../modules/expense/pages/ExpenseReviewPage";
+import JobListPage from "../modules/jobs/pages/JobListPage";
+import JobDetailPage from "../modules/jobs/pages/JobDetailsPage";
+import MyReferralsPage from "../modules/jobs/pages/MyReferralsPage";
+import AllReferralsPage from "../modules/jobs/pages/AllReferralsPage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -56,6 +60,29 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      //Jobs
+      {
+        path:"jobs",
+        children:[
+          {
+            index:true,
+            element:<JobListPage/>
+          },
+          {
+            path:":id",
+            element:<JobDetailPage/>
+          },
+        ]
+      },
+      //Referrals
+      {
+        path:"referrals",
+        element:<MyReferralsPage/>
+      },
+      {
+        path:"referrals/review",
+        element:<AllReferralsPage/>
+      }
     ],
   },
   {
