@@ -11,6 +11,7 @@ import JobListPage from "../modules/jobs/pages/JobListPage";
 import JobDetailPage from "../modules/jobs/pages/JobDetailsPage";
 import MyReferralsPage from "../modules/jobs/pages/MyReferralsPage";
 import AllReferralsPage from "../modules/jobs/pages/AllReferralsPage";
+import OrgChartPage from "../modules/org/pages/OrgChartPage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -82,7 +83,12 @@ export const router = createBrowserRouter([
       {
         path:"referrals/review",
         element:<AllReferralsPage/>
-      }
+      },
+      //Organization
+      {
+        path:"org",
+        element:<OrgChartPage/>
+      },
     ],
   },
   {

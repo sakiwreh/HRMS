@@ -5,6 +5,7 @@ import com.capestone.hrms_backend.entity.expense.Expense;
 import com.capestone.hrms_backend.entity.expense.ExpenseProof;
 import com.capestone.hrms_backend.entity.job.JobCvReviewer;
 import com.capestone.hrms_backend.entity.job.JobOpening;
+import com.capestone.hrms_backend.entity.organization.Employee;
 import com.capestone.hrms_backend.entity.travel.TravelDocument;
 import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import org.modelmapper.Conditions;
@@ -70,6 +71,13 @@ public class ModelMapperConfig {
                    m.map(reviewer->reviewer.getReveiwer().getId(),JobOpeningReviewerResponseDto::setId);
                    m.map(reviewer->reviewer.getReveiwer().getFirstName(),JobOpeningReviewerResponseDto::setName);
                    m.map(reviewer->reviewer.getReveiwer().getUser().getEmail(),JobOpeningReviewerResponseDto::setEmail);
+                });
+        modelMapper.typeMap(Employee.class, EmployeeProfileDto.class)
+                .addMappings(m->{
+                    m.map(emp->emp.getUser().getEmail(),EmployeeProfileDto::setEmail);
+                    m.map(emp->emp.getDepartment().getName(),EmployeeProfileDto::setDepartment);
+                    m.map(emp->emp.getRole().getName(),EmployeeProfileDto::setRole);
+                    m.map(emp->emp.getManager().getFirstName(),EmployeeProfileDto::setManagerName);
                 });
 
         return modelMapper;
