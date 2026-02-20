@@ -4,5 +4,6 @@ public enum ReferralStatus {
     REFERRED,
     SHORTLISTED,
     INTERVIEW,
-    SELECTED
+    SELECTED,
+    REJECTED
 }

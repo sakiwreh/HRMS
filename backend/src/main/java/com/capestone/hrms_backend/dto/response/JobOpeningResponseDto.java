@@ -10,7 +10,10 @@ public class JobOpeningResponseDto {
     private String title;
     private String description;
     private Long hrId;
+    private String createdByName;
     private String communicationEmail;
     private String jobDescriptionUrl;
     private String status;
+    private float experienceRequired;
+    private String reason;
 }

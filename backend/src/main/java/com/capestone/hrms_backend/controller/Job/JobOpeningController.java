@@ -4,7 +4,7 @@ import com.capestone.hrms_backend.dto.request.AddCvReveiwerRequestDto;
 import com.capestone.hrms_backend.dto.request.JobOpeningRequestDto;
 import com.capestone.hrms_backend.dto.request.JobStatusRequestDto;
 import com.capestone.hrms_backend.dto.response.JobOpeningResponseDto;
-import com.capestone.hrms_backend.entity.job.JobStatus;
+import com.capestone.hrms_backend.dto.response.JobOpeningReviewerResponseDto;
 import com.capestone.hrms_backend.security.HrmsUserDetails;
 import com.capestone.hrms_backend.service.IJobOpeningService;
 import jakarta.validation.Valid;
@@ -61,6 +61,13 @@ public class JobOpeningController {
         jobOpeningService.removeReviewer(id,empId);
         return ResponseEntity.ok("Reveiwer removed from job");
     }
+
+    @GetMapping("/{id}/reviewers")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<JobOpeningReviewerResponseDto>> getReviewers(@PathVariable Long id){
+        return ResponseEntity.ok(jobOpeningService.getReviewers(id));
+    }
+
 
 
 }

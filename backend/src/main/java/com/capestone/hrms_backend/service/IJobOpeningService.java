@@ -3,7 +3,6 @@ package com.capestone.hrms_backend.service;
 import com.capestone.hrms_backend.dto.request.JobOpeningRequestDto;
 import com.capestone.hrms_backend.dto.response.JobOpeningResponseDto;
 import com.capestone.hrms_backend.dto.response.JobOpeningReviewerResponseDto;
-import com.capestone.hrms_backend.dto.response.TravelParticipantResponseDto;
 import com.capestone.hrms_backend.entity.job.JobStatus;
 
 import java.io.IOException;
