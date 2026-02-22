@@ -17,10 +17,13 @@ export default function JobListPage() {
   const { data: jobs, isLoading } = useJobs(isHR);
   const [createOpen, setCreateOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("");
+  const visibleJobs = (jobs ?? []).filter((j:any) => isHR || j.status === "OPEN");
  
-  const filtered = filterStatus
-    ? jobs?.filter((j: any) => j.status === filterStatus)
-    : jobs;
+  const filtered = isHR && filterStatus
+    ? visibleJobs?.filter((j: any) => j.status === filterStatus)
+    : visibleJobs;
+
+  
  
   if (isLoading) return <div>Loading jobs...</div>;
  

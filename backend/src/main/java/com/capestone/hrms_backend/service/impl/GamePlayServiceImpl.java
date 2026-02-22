@@ -1,6 +1,7 @@
 package com.capestone.hrms_backend.service.impl;
 
 import com.capestone.hrms_backend.dto.request.GameWaitlistRequestDto;
+import com.capestone.hrms_backend.dto.response.EmployeeLookupDto;
 import com.capestone.hrms_backend.dto.response.GameBookingResponseDto;
 import com.capestone.hrms_backend.dto.response.GameResponseDto;
 import com.capestone.hrms_backend.dto.response.GameWaitlistResponseDto;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,6 +90,21 @@ public class GamePlayServiceImpl implements IGamePlayService {
     }
 
     @Override
+    public List<EmployeeLookupDto> getInterestedEmployees(Long gameId) {
+        findGame(gameId);
+        return interestRepo.findByGameId(gameId).stream()
+                .map(GameInterest::getEmployee)
+                .map(e -> new EmployeeLookupDto(
+                        e.getId(),
+                        fullName(e),
+                        e.getUser() != null ? e.getUser().getEmail() : null,
+                        e.getDesignation(),
+                        e.getDepartment() != null ? e.getDepartment().getName() : null))
+                .sorted(Comparator.comparing(EmployeeLookupDto::getName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public GameWaitlistResponseDto submitRequest(GameWaitlistRequestDto dto, Long requestedById) {
         log.info("DTO: {}",dto);
@@ -106,8 +123,8 @@ public class GamePlayServiceImpl implements IGamePlayService {
         pids.add(requestedById);
 
         // max participants per booking from game config
-        if (pids.size() > game.getMaxParticipantsPerBooking())
-            throw new BusinessException("Maximum " + game.getMaxParticipantsPerBooking()
+        if (pids.size() > game.getMaxPlayersPerSlot())
+            throw new BusinessException("Maximum " + game.getMaxPlayersPerSlot()
                     + " participants allowed per booking");
 
         log.info("Validating participants");
@@ -316,7 +333,6 @@ public void allocateSlot(Long slotId) {
     }
 
     slot.setBookedCount(occupied);
-    slot.setAllocated(true);
     if (occupied >= capacity)
         slot.setStatus(SlotStatus.LOCKED);
     slotRepo.save(slot);
@@ -465,7 +481,6 @@ public void allocateSlot(Long slotId) {
                 .startHour(g.getStartHour()).endHour(g.getEndHour())
                 .maxDurationMins(g.getMaxDurationMins())
                 .maxPlayersPerSlot(g.getMaxPlayersPerSlot())
-                .maxParticipantsPerBooking(g.getMaxParticipantsPerBooking())
                 .cancellationBeforeMins(g.getCancellationBeforeMins())
                 .slotGenerationDays(g.getSlotGenerationDays())
                 .build();

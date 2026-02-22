@@ -18,6 +18,7 @@ import {
   fetchMyBookings,
   fetchSlotBookings,
   fetchEmployeeLookup,
+  fetchInterestedEmployees,
 } from "../api/gameApi";
  
 //Games
@@ -179,5 +180,13 @@ export function useEmployeeLookup(enabled = true) {
     queryKey: ["employee-lookup"],
     queryFn: fetchEmployeeLookup,
     enabled,
+  });
+}
+
+export function useInterestedEmployees(gameId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["game-interested-employees", gameId],
+    queryFn: () => fetchInterestedEmployees(gameId),
+    enabled: enabled && !!gameId,
   });
 }

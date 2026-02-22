@@ -19,6 +19,5 @@ public class GameSlotResponseDto {
     private LocalDateTime slotEnd;
     private int capacity;
     private int bookedCount;
-    private boolean allocated;
     private String status;
 }

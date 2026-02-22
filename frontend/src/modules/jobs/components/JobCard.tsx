@@ -38,8 +38,8 @@ export default function JobCard({ job, role }: { job: Job; role: string }) {
         </div>
  
         <div className="flex items-center gap-4 text-sm text-gray-500">
-          <span>{job.experienceRequired}+ yrs experience</span>
-          {job.createdByName && <span>• Posted by {job.createdByName}</span>}
+          <span>{job.experienceRequired} yrs experience</span>
+          {job.createdByName && <span> Posted by {job.createdByName}</span>}
         </div>
  
         <div className="flex items-center gap-2 pt-1 border-t">
@@ -66,7 +66,7 @@ export default function JobCard({ job, role }: { job: Job; role: string }) {
               to={`/dashboard/jobs/${job.id}`}
               className="ml-auto text-sm text-gray-500 hover:text-gray-800 px-3 py-1.5 rounded hover:bg-gray-100"
             >
-              Manage →
+              Manage
             </NavLink>
           )}
         </div>

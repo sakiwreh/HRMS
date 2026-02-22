@@ -33,9 +33,6 @@ public class GameSlot extends Base {
     @Column(name = "booked_count", nullable = false)
     private int bookedCount = 0;
 
-    @Column(name = "allocated", nullable = false)
-    private boolean allocated = false;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SlotStatus status = SlotStatus.AVAILABLE;

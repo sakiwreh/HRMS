@@ -10,7 +10,6 @@ export interface GameDto {
   endHour: string;
   maxDurationMins: number;
   maxPlayersPerSlot: number;
-  maxParticipantsPerBooking: number;
   cancellationBeforeMins: number;
   slotGenerationDays: number;
 }
@@ -24,7 +23,6 @@ export interface GameSlotDto {
   slotEnd: string;
   capacity: number;
   bookedCount: number;
-  allocated: boolean;
   status: string;
 }
  
@@ -57,8 +55,10 @@ export interface BookingDto {
  
 export interface EmployeeLookup {
   id: number;
-  empId: string;
   name: string;
+  email: string | null;
+  designation: string | null;
+  department: string | null;
 }
  
 //games
@@ -74,7 +74,6 @@ export const createGame = (data: {
   endHour: string;
   maxDurationMins: number;
   maxPlayersPerSlot: number;
-  maxParticipantsPerBooking: number;
   cancellationBeforeMins: number;
   slotGenerationDays: number;
 }) => api.post<GameDto>("/games", data).then((r) => r.data);
@@ -87,7 +86,6 @@ export const updateGame = (
     endHour: string;
     maxDurationMins: number;
     maxPlayersPerSlot: number;
-    maxParticipantsPerBooking: number;
     cancellationBeforeMins: number;
     slotGenerationDays: number;
   }
@@ -147,3 +145,6 @@ export const fetchSlotBookings = (slotId: number) =>
  
 export const fetchEmployeeLookup = () =>
   api.get<EmployeeLookup[]>("/employees/lookup").then((r) => r.data);
+
+export const fetchInterestedEmployees = (gameId: number) =>
+  api.get<EmployeeLookup[]>(`/games/${gameId}/interested-employees`).then((r) => r.data);

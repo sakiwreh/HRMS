@@ -122,7 +122,6 @@ public class GameAdminServiceImpl implements IGameAdminService {
         game.setEndHour(dto.getEndHour());
         game.setMaxDurationMins(dto.getMaxDurationMins());
         game.setMaxPlayersPerSlot(dto.getMaxPlayersPerSlot());
-        game.setMaxParticipantsPerBooking(dto.getMaxParticipantsPerBooking());
         game.setCancellationBeforeMins(dto.getCancellationBeforeMins());
         game.setSlotGenerationDays(dto.getSlotGenerationDays());
     }
@@ -133,7 +132,6 @@ public class GameAdminServiceImpl implements IGameAdminService {
                 .startHour(g.getStartHour()).endHour(g.getEndHour())
                 .maxDurationMins(g.getMaxDurationMins())
                 .maxPlayersPerSlot(g.getMaxPlayersPerSlot())
-                .maxParticipantsPerBooking(g.getMaxParticipantsPerBooking())
                 .cancellationBeforeMins(g.getCancellationBeforeMins())
                 .slotGenerationDays(g.getSlotGenerationDays())
                 .build();
@@ -146,7 +144,6 @@ public class GameAdminServiceImpl implements IGameAdminService {
                 .slotStart(s.getSlotStart()).slotEnd(s.getSlotEnd())
                 .capacity(g.getMaxPlayersPerSlot())
                 .bookedCount(s.getBookedCount())
-                .allocated(s.isAllocated())
                 .status(s.getStatus().name())
                 .build();
     }

@@ -13,6 +13,12 @@ interface Props {
 function formatDate(d: Date) {
   return d.toISOString().split("T")[0];
 }
+
+function addDays(date: Date, days: number){
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
  
 function formatTime(dt: string) {
   return dt?.split("T")[1]?.slice(0, 5) ?? "";
@@ -30,13 +36,9 @@ export default function GameSlotsView({ game, onBack }: Props) {
   const isHR = user?.role === "HR";
  
   const today = useMemo(() => new Date(), []);
+  const defaultToDate = useMemo(()=>addDays(today,2),[today])
   const [from, setFrom] = useState(formatDate(today));
-  const futureDate = useMemo(() => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + game.slotGenerationDays);
-    return formatDate(d);
-  }, [today, game.slotGenerationDays]);
-  const [to, setTo] = useState(futureDate);
+  const [to, setTo] = useState(formatDate(defaultToDate));
  
   const { data: slots = [], isLoading } = useSlots(game.id, from, to);
   const genSlots = useGenerateSlots();
@@ -145,12 +147,11 @@ export default function GameSlotsView({ game, onBack }: Props) {
                       }`}
                     >
                       {s.status}
-                      {s.allocated ? " (Allocated)" : ""}
                     </span>
                   </div>
  
                   {/* Book button for non-HR when slot is available */}
-                  {!isHR && s.status === "AVAILABLE" && !s.allocated && (
+                  {!isHR && s.status === "AVAILABLE" && (
                     <button
                       onClick={() => setBookSlot(s)}
                       className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"

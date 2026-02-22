@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useEmployeeLookup, useSubmitRequest } from "../hooks/useGames";
-import type { GameDto, GameSlotDto } from "../api/gameApi";
+import { useMemo, useState } from "react";
+import { useInterestedEmployees, useSubmitRequest } from "../hooks/useGames";
+import type { EmployeeLookup, GameDto, GameSlotDto } from "../api/gameApi";
 import { useAppSelector } from "../../../store/hooks";
  
 interface Props {
@@ -11,12 +11,14 @@ interface Props {
  
 export default function BookSlotForm({ slot, game, onDone }: Props) {
   const user = useAppSelector((s) => s.auth.user);
-  const { data: employees = [] } = useEmployeeLookup();
+  const { data: interestedEmployees = [], isLoading: employeesLoading } =
+    useInterestedEmployees(game.id);
   const submit = useSubmitRequest();
  
   const [selected, setSelected] = useState<number[]>([]);
+  const [search, setSearch] = useState("");
  
-  const maxExtra = game.maxParticipantsPerBooking - 1; // requestor is auto-added
+  const maxExtra = game.maxPlayersPerSlot - 1; // requestor is auto-added
  
   const toggle = (id: number) => {
     setSelected((prev) =>
@@ -35,8 +37,22 @@ export default function BookSlotForm({ slot, game, onDone }: Props) {
     );
   };
  
-  // filter out the current user from the employee list
-  const others = employees.filter((e: { id: number }) => e.id !== user?.id);
+  // Only interested employees are fetched from API; remove current user from options.
+  const others = useMemo(
+    () => interestedEmployees.filter((e: EmployeeLookup) => e.id !== user?.id),
+    [interestedEmployees, user?.id],
+  );
+ 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return others;
+    return others.filter((e: EmployeeLookup) =>
+      e.name.toLowerCase().includes(q) ||
+      (e.email ?? "").toLowerCase().includes(q) ||
+      (e.designation ?? "").toLowerCase().includes(q) ||
+      (e.department ?? "").toLowerCase().includes(q),
+    );
+  }, [others, search]);
  
   return (
     <div className="space-y-4">
@@ -59,15 +75,31 @@ export default function BookSlotForm({ slot, game, onDone }: Props) {
  
       <div>
         <p className="text-sm font-medium text-gray-700 mb-2">
-          Add up to {maxExtra} other participant{maxExtra > 1 ? "s" : ""} (you
-          are included automatically):
+          Add up to {maxExtra} other participant{maxExtra > 1 ? "s" : ""} from
+          interested employees (you are included automatically):
         </p>
  
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email, designation..."
+          className="w-full border rounded-lg px-3 py-2 text-sm mb-2"
+        />
+ 
         <div className="max-h-48 overflow-y-auto border rounded-lg divide-y">
-          {others.length === 0 && (
-            <p className="p-3 text-gray-400 text-sm">No employees found</p>
+          {employeesLoading && (
+            <p className="p-3 text-gray-400 text-sm">Loading employees...</p>
           )}
-          {others.map((e: { id: number; name: string; empId: string }) => (
+          {!employeesLoading && others.length === 0 && (
+            <p className="p-3 text-gray-400 text-sm">
+              No interested employees found
+            </p>
+          )}
+          {!employeesLoading && others.length > 0 && filtered.length === 0 && (
+            <p className="p-3 text-gray-400 text-sm">No matches found</p>
+          )}
+          {filtered.map((e: EmployeeLookup) => (
             <label
               key={e.id}
               className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer"
@@ -78,9 +110,11 @@ export default function BookSlotForm({ slot, game, onDone }: Props) {
                 onChange={() => toggle(e.id)}
                 className="accent-blue-600"
               />
-              <span className="text-sm">
-                {e.name}{" "}
-                <span className="text-gray-400 text-xs">({e.empId})</span>
+              <span className="text-sm flex flex-col">
+                <span>{e.name}</span>
+                {e.email && (
+                  <span className="text-gray-400 text-xs">{e.email}</span>
+                )}
               </span>
             </label>
           ))}

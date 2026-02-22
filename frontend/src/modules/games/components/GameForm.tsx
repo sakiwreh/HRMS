@@ -13,7 +13,6 @@ interface FormValues {
   endHour: string;
   maxDurationMins: number;
   maxPlayersPerSlot: number;
-  maxParticipantsPerBooking: number;
   cancellationBeforeMins: number;
   slotGenerationDays: number;
 }
@@ -34,7 +33,6 @@ export default function GameForm({ game, onDone }: Props) {
           endHour: game.endHour,
           maxDurationMins: game.maxDurationMins,
           maxPlayersPerSlot: game.maxPlayersPerSlot,
-          maxParticipantsPerBooking: game.maxParticipantsPerBooking,
           cancellationBeforeMins: game.cancellationBeforeMins,
           slotGenerationDays: game.slotGenerationDays,
         }
@@ -44,7 +42,6 @@ export default function GameForm({ game, onDone }: Props) {
           endHour: "18:00",
           maxDurationMins: 30,
           maxPlayersPerSlot: 4,
-          maxParticipantsPerBooking: 4,
           cancellationBeforeMins: 30,
           slotGenerationDays: 3,
         },
@@ -55,7 +52,6 @@ export default function GameForm({ game, onDone }: Props) {
       ...values,
       maxDurationMins: Number(values.maxDurationMins),
       maxPlayersPerSlot: Number(values.maxPlayersPerSlot),
-      maxParticipantsPerBooking: Number(values.maxParticipantsPerBooking),
       cancellationBeforeMins: Number(values.cancellationBeforeMins),
       slotGenerationDays: Number(values.slotGenerationDays),
     };
@@ -135,19 +131,6 @@ export default function GameForm({ game, onDone }: Props) {
  
       {/* Per booking & cancellation */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Max Participants Per Booking
-          </label>
-          <input
-            type="number"
-            {...register("maxParticipantsPerBooking", {
-              required: "Required",
-              min: 1,
-            })}
-            className="w-full border rounded-lg px-3 py-2"
-          />
-        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Cancellation Lead (mins)

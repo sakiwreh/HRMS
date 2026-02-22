@@ -2,10 +2,7 @@ package com.capestone.hrms_backend.controller.Game;
 
 import com.capestone.hrms_backend.dto.request.GameRequestDto;
 import com.capestone.hrms_backend.dto.request.GameWaitlistRequestDto;
-import com.capestone.hrms_backend.dto.response.GameBookingResponseDto;
-import com.capestone.hrms_backend.dto.response.GameResponseDto;
-import com.capestone.hrms_backend.dto.response.GameSlotResponseDto;
-import com.capestone.hrms_backend.dto.response.GameWaitlistResponseDto;
+import com.capestone.hrms_backend.dto.response.*;
 import com.capestone.hrms_backend.security.HrmsUserDetails;
 import com.capestone.hrms_backend.service.IGameAdminService;
 import com.capestone.hrms_backend.service.IGamePlayService;
@@ -140,5 +137,10 @@ public class GameController{
     public ResponseEntity<String> finalizeWaitlist(){
         gamePlayService.finalizeExpiredWaitlistEntries();
         return ResponseEntity.ok("Finalized waitlisted entries");
+    }
+
+    @GetMapping("/{gameId}/interested-employees")
+    public ResponseEntity<List<EmployeeLookupDto>> getInterestedEmployees(@PathVariable Long gameId){
+        return ResponseEntity.ok(gamePlayService.getInterestedEmployees(gameId));
     }
 }

@@ -1,6 +1,7 @@
 package com.capestone.hrms_backend.service;
 
 import com.capestone.hrms_backend.dto.request.GameWaitlistRequestDto;
+import com.capestone.hrms_backend.dto.response.EmployeeLookupDto;
 import com.capestone.hrms_backend.dto.response.GameBookingResponseDto;
 import com.capestone.hrms_backend.dto.response.GameResponseDto;
 import com.capestone.hrms_backend.dto.response.GameWaitlistResponseDto;
@@ -13,6 +14,7 @@ public interface    IGamePlayService {
     public void registerInterest(Long gameId, Long employeeId);
     public void removeInterest(Long gameId, Long employeeId);
     public List<GameResponseDto> getMyInterests(Long employeeId);
+    List<EmployeeLookupDto> getInterestedEmployees(Long gameId);
 
     //Request
     public GameWaitlistResponseDto submitRequest(GameWaitlistRequestDto dto, Long requestedById);
@@ -28,4 +30,6 @@ public interface    IGamePlayService {
     //System Updation
     public void completeExpiredBookings();
     public void finalizeExpiredWaitlistEntries();
+
+
 }

@@ -34,8 +34,6 @@ public class Game extends Base {
     @Column(name = "max_players_per_slot", nullable = false)
     private Integer maxPlayersPerSlot;
 
-    @Column(name = "max_participants_per_booking", nullable = false)
-    private Integer maxParticipantsPerBooking;
 
     @Column(name = "cancellation_before_mins", nullable = false)
     private Integer cancellationBeforeMins;

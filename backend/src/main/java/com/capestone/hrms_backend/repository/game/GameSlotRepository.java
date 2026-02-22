@@ -24,8 +24,6 @@ public interface GameSlotRepository extends JpaRepository<GameSlot, Long> {
     boolean existsByGameIdAndSlotDate(Long gameId, LocalDate slotDate);
 
     /** Slots whose cutoff time has passed but haven't been allocated yet */
-    @Query("SELECT s FROM GameSlot s WHERE s.allocated = false " +
-            "AND s.status = 'AVAILABLE' " +
-            "AND s.slotStart > :now")
+    @Query("SELECT s FROM GameSlot s WHERE s.status = 'AVAILABLE' AND s.slotStart > :now")
     List<GameSlot> findUnallocatedFutureSlots(LocalDateTime now);
 }
