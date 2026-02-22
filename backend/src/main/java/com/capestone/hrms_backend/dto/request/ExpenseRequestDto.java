@@ -23,4 +23,5 @@ public class ExpenseRequestDto {
 
     @NotNull
     private LocalDateTime expenseDate;
+    private Boolean draft;
 }

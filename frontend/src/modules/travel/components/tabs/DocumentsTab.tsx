@@ -5,6 +5,7 @@ import useDeleteDocument from "../../hooks/useDeleteDocument";
 import Modal from "../../../../shared/components/Modal";
 import UploadDocumentForm from "../UploadDocumentForm";
 import { previewDocument, downloadDocument } from "../../util/documentActions";
+import toast from "react-hot-toast";
  
 type Props = {
   travel: any;
@@ -12,7 +13,9 @@ type Props = {
  
 export default function DocumentsTab({ travel }: Props) {
   const travelId = travel?.id;
+  const isCancelled = travel?.cancelled;
   const user = useAppSelector((s) => s.auth.user);
+  const isHR = user?.role === "HR";
   const { data: documents = [], isLoading } = useDocuments(travelId);
   const deleteMutation = useDeleteDocument(travelId);
   const [open, setOpen] = useState(false);
@@ -24,37 +27,94 @@ export default function DocumentsTab({ travel }: Props) {
  
   const handleDelete = (docId: number) => {
     if (!confirm("Delete this document?")) return;
-    deleteMutation.mutate(docId);
+    deleteMutation.mutate(docId, {
+      onSuccess: () => toast.success("Document deleted"),
+    });
   };
+ 
+  // Separate common documents from employee's own documents
+  const commonDocs = documents.filter((d: any) => !d.uploadedForId && d.uploadedById!==user?.id);
+  const myDocs = documents.filter((d: any) => d.uploadedById===user?.id || d.uploadedForId === user?.id);
  
   return (
     <div className="space-y-5">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Travel Documents</h2>
  
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          Upload Document
-        </button>
-      </div>
-      <div className="space-y-3">
-        {documents.length === 0 && (
-          <div className="text-gray-400 border rounded-md p-4 text-center">
-            No documents uploaded yet
-          </div>
+        {!isCancelled && (
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Upload Document
+          </button>
         )}
- 
-        {documents.map((doc: any) => (
-          <DocumentCard
-            key={doc.id}
-            doc={doc}
-            canDelete={user?.role === "HR" || doc.uploadedBy === user?.id}
-            onDelete={() => handleDelete(doc.id)}
-          />
-        ))}
       </div>
+ 
+      {documents.length === 0 && (
+        <div className="text-gray-400 border rounded-md p-4 text-center">
+          No documents uploaded yet
+        </div>
+      )}
+ 
+      {/* Common Documents */}
+      {commonDocs.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+            Common Documents
+          </h3>
+          <div className="space-y-3">
+            {commonDocs.map((doc: any) => (
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                canDelete={isHR || doc.uploadedById === user?.id}
+                onDelete={() => handleDelete(doc.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+ 
+      {/* Own Documents */}
+      {!isHR && myDocs.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+            My Documents
+          </h3>
+          <div className="space-y-3">
+            {myDocs.map((doc: any) => (
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                canDelete={doc.uploadedById === user?.id}
+                onDelete={() => handleDelete(doc.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+ 
+      {/* Employee Documents — HR view */}
+      {isHR && documents.filter((d: any) => !!d.uploadedForId).length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+            Employee Documents
+          </h3>
+          <div className="space-y-3">
+            {documents.filter((d: any) => !!d.uploadedForId).map((doc: any) => (
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                canDelete={true}
+                onDelete={() => handleDelete(doc.id)}
+                showForLabel
+              />
+            ))}
+          </div>
+        </div>
+      )}
+ 
       <Modal title="Upload Document" open={open} onClose={() => setOpen(false)}>
         <UploadDocumentForm
           travelId={travelId}
@@ -69,10 +129,12 @@ function DocumentCard({
   doc,
   canDelete,
   onDelete,
+  showForLabel = false,
 }: {
   doc: any;
   canDelete: boolean;
   onDelete: () => void;
+  showForLabel?: boolean;
 }) {
   return (
     <div className="border rounded-md p-4 flex justify-between items-center bg-white shadow-sm">
@@ -80,11 +142,12 @@ function DocumentCard({
         <div className="font-medium text-gray-800">
           {doc.description || doc.fileName}
         </div>
- 
-        <div className="text-xs text-gray-500">{doc.docType}</div>
- 
-        <div className="text-xs text-gray-400">
-          {(doc.fileSize / 1024).toFixed(1)} KB
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          <span>{doc.docType}</span>
+          <span>{(doc.fileSize / 1024).toFixed(1)} KB</span>
+          {showForLabel && doc.uploadedForName && (
+            <span className="text-blue-600">for {doc.uploadedForName}</span>
+          )}
         </div>
       </div>
       <div className="flex gap-4">

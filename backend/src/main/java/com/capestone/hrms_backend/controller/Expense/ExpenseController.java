@@ -34,6 +34,17 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.myExpenses(user.getEmployeeId()));
     }
 
+    @GetMapping("/drafts")
+    public ResponseEntity<List<ExpenseResponseDto>> drafts(@AuthenticationPrincipal HrmsUserDetails user) {
+        return ResponseEntity.ok(expenseService.myDrafts(user.getEmployeeId()));
+    }
+
+    @PatchMapping("/{id}/submit")
+    public ResponseEntity<ExpenseResponseDto> submitDraft(@PathVariable Long id,
+                                                          @AuthenticationPrincipal HrmsUserDetails user) {
+        return ResponseEntity.ok(expenseService.submitDraft(id, user.getEmployeeId()));
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<ExpenseResponseDto>> pending(){
         return ResponseEntity.ok(expenseService.pendingExepnses());
@@ -64,5 +75,10 @@ public class ExpenseController {
             @RequestParam(required = false) LocalDateTime fromDate,
             @RequestParam(required = false) LocalDateTime toDate) {
         return ResponseEntity.ok(expenseService.getFiltered(employeeId, status, travelId,fromDate,toDate));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ExpenseResponseDto> getById(@PathVariable Long id){
+        return ResponseEntity.ok(expenseService.getById(id));
     }
 }

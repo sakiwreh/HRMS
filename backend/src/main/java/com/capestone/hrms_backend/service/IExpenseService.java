@@ -17,5 +17,8 @@ public interface IExpenseService {
     ExpenseResponseDto review(Long expenseId, Long hrId, ReviewExpenseRequestDto requestDto);
     List<ExpenseCategoryResponseDto> getAllCategories();
     BigDecimal getTotalByTravel(Long travelId);
-    public List<ExpenseResponseDto> getFiltered(Long employeeId, ExpenseStatus status, Long travelId, LocalDateTime fromDate, LocalDateTime toDate);
+    List<ExpenseResponseDto> getFiltered(Long employeeId, ExpenseStatus status, Long travelId, LocalDateTime fromDate, LocalDateTime toDate);
+    List<ExpenseResponseDto> myDrafts(Long empId);
+    ExpenseResponseDto submitDraft(Long expenseId, Long empId);
+    ExpenseResponseDto getById(Long expenseId);
 }

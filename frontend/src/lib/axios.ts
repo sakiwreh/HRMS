@@ -1,4 +1,5 @@
 import axios from "axios";
+import toast from "react-hot-toast";
  
 const instance = axios.create({
   baseURL: "http://localhost:8080",
@@ -33,6 +34,10 @@ instance.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("auth_user");
       window.location.href = "/login";
+    }
+    else{
+      const msg = error.response?.data?.message || error.response?.data?.error || error.message;
+      toast.error(msg);
     }
  
     return Promise.reject(error);

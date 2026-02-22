@@ -4,6 +4,11 @@ export const fetchJobs = async () => {
   const res = await api.get("/jobs/all");
   return res.data;
 };
+
+export const fetchJobsForHr = async () => {
+  const res = await api.get("/jobs/all/hr");
+  return res.data;
+}
  
 export const fetchJobById = async (id: number) => {
   const res = await api.get(`/jobs/${id}`);
@@ -44,8 +49,8 @@ export const addReviewers = async (
   return res.data;
 };
  
-export const shareJob = async (jobId: number, candidateEmail: string) => {
-  const res = await api.post(`/job/${jobId}/share`, {candidateEmail});
+export const shareJob = async (jobId: number, candidateEmails: string[]) => {
+  const res = await api.post(`/job/${jobId}/share`, {candidateEmails});
   return res.data;
 };
  
@@ -80,3 +85,8 @@ export const fetchEmployees = async () => {
   const res = await api.get("/employees/lookup");
   return res.data;
 };
+
+export const fetchReferralsByJob = async (jobId: number) => {
+  const res = await api.get(`/job/${jobId}/referrals`);
+  return res.data;
+}

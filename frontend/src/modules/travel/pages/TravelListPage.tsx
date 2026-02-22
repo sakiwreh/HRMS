@@ -45,29 +45,50 @@ export default function TravelListPage() {
           </div>
         )}
  
-        {data?.map((t: any) => (
-          <NavLink
-            key={t.id}
-            to={`/dashboard/travel/${t.id}`}
-            className={({ isActive }) =>
-              `block p-4 transition ${
-                isActive ? "bg-blue-50" : "hover:bg-gray-50"
-              }`
-            }
-          >
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-800">{t.title}</span>
-              {t.cancelled && (
-                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                  Cancelled
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-gray-500">
-              {t.destination} • {t.departureDate} → {t.returnDate}
-            </div>
-          </NavLink>
-        ))}
+        {data?.map((t: any) => {
+          const isCancelled = t.cancelled;
+ 
+          const inner = (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-800">{t.title}</span>
+                {isCancelled && (
+                  <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                    Cancelled
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-gray-500">
+                {t.destination} • {t.departureDate} → {t.returnDate}
+              </div>
+            </>
+          );
+ 
+          if (isCancelled) {
+            return (
+              <div
+                key={t.id}
+                className="block p-4 bg-gray-50 opacity-60 cursor-not-allowed"
+              >
+                {inner}
+              </div>
+            );
+          }
+ 
+          return (
+            <NavLink
+              key={t.id}
+              to={`/dashboard/travel/${t.id}`}
+              className={({ isActive }) =>
+                `block p-4 transition ${
+                  isActive ? "bg-blue-50" : "hover:bg-gray-50"
+                }`
+              }
+            >
+              {inner}
+            </NavLink>
+          );
+        })}
       </div>
  
       {/* MODAL */}

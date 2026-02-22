@@ -13,16 +13,20 @@ type Job = {
   createdByName?: string;
 };
  
-export default function JobCard({ job, isHR }: { job: Job; isHR: boolean }) {
+export default function JobCard({ job, role }: { job: Job; role: string }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [referOpen, setReferOpen] = useState(false);
+  const isHR = role === "HR";
+  const canShareRefer = !isHR;
  
   return (
     <>
       <div className="bg-white rounded-lg shadow p-5 flex flex-col gap-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">{job.title}</h3>
+            <h3 className="font-semibold text-gray-900 truncate">
+              {job.title}
+            </h3>
             <p className="text-sm text-gray-500 mt-1 line-clamp-2">
               {job.description}
             </p>
@@ -39,32 +43,38 @@ export default function JobCard({ job, isHR }: { job: Job; isHR: boolean }) {
         </div>
  
         <div className="flex items-center gap-2 pt-1 border-t">
-          <button
-            onClick={() => setShareOpen(true)}
-            className="text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded hover:bg-blue-50"
-          >
-            Share Job
-          </button>
+          {canShareRefer && (
+            <>
+              <button
+                onClick={() => setShareOpen(true)}
+                className="text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded hover:bg-blue-50"
+              >
+                Share Job
+              </button>
  
-          <button
-            onClick={() => setReferOpen(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-800 px-3 py-1.5 rounded hover:bg-indigo-50"
-          >
-            Refer Friend
-          </button>
+              <button
+                onClick={() => setReferOpen(true)}
+                className="text-sm text-indigo-600 hover:text-indigo-800 px-3 py-1.5 rounded hover:bg-indigo-50"
+              >
+                Refer Friend
+              </button>
+            </>
+          )}
  
           {isHR && (
             <NavLink
               to={`/dashboard/jobs/${job.id}`}
               className="ml-auto text-sm text-gray-500 hover:text-gray-800 px-3 py-1.5 rounded hover:bg-gray-100"
             >
-              Manage
+              Manage →
             </NavLink>
           )}
         </div>
       </div>
  
-      <ShareJobModal
+      {canShareRefer && (
+        <>
+        <ShareJobModal
         jobId={job.id}
         jobTitle={job.title}
         open={shareOpen}
@@ -77,6 +87,8 @@ export default function JobCard({ job, isHR }: { job: Job; isHR: boolean }) {
         open={referOpen}
         onClose={() => setReferOpen(false)}
       />
+       </>
+      )}
     </>
   );
 }

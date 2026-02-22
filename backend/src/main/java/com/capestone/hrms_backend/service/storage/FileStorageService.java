@@ -91,6 +91,26 @@ public class FileStorageService {
         return path.toString();
     }
 
+
+    public String savePostAttachment(Long postId, MultipartFile file) throws IOException {
+        String folder = basePath + "posts/" + postId + "/";
+
+        //Creating directory
+        Files.createDirectories(Paths.get(folder));
+
+        //Generating name
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        //Generating path
+        Path path = Paths.get(folder + fileName);
+
+        //Saving File
+        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+        return path.toString(); // return public URL if you have a serving layer
+    }
+
+
     public byte[] read(String path) throws IOException{
         return Files.readAllBytes(Paths.get(path));
     }

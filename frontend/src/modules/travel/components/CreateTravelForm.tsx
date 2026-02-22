@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { createTravel } from "../api/travelApi";
+import toast from "react-hot-toast";
  
 type TravelForm = {
   title: string;
@@ -25,6 +26,7 @@ export default function CreateTravelForm() {
     mutationFn: createTravel,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["travels"] });
+      toast.success("Travel plan created successfully");
       reset();
     },
   });

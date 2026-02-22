@@ -16,6 +16,7 @@ public interface ExpenseRepository extends JpaRepository<Expense,Long> {
     List<Expense> findByTravelPlanId(Long travelPlanId);
     List<Expense> findByEmployeeId(Long empId);
     List<Expense> findByStatus(ExpenseStatus status);
+    List<Expense> findByEmployeeIdAndStatus(Long empId,ExpenseStatus status);
 
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.employee.id = :empId AND e.travelPlan.id = :travelId AND e.expenseDate >= :dayStart AND e.expenseDate < :dayEnd")
     BigDecimal sumAmountByEmployeeAndTravelAndDate(@Param("empId") Long empId, @Param("travelId") Long travelId, @Param("dayStart") LocalDateTime dayStart, @Param("dayEnd") LocalDateTime dayEnd);

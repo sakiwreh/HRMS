@@ -16,4 +16,5 @@ public interface IJobOpeningService {
     void addReviewer(Long jobOpeningId, List<Long> empIds);
     void removeReviewer(Long jobOpeningId, Long empId);
     List<JobOpeningReviewerResponseDto> getReviewers(Long jobOpeningId);
+    List<JobOpeningResponseDto> getAllOpeningsForHr();
 }

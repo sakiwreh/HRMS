@@ -11,6 +11,7 @@ import com.capestone.hrms_backend.service.IGameAdminService;
 import com.capestone.hrms_backend.service.IGamePlayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/games")
 @RequiredArgsConstructor
@@ -90,6 +92,7 @@ public class GameController{
     //Waitlists
     @PostMapping("/waitlist")
     public ResponseEntity<GameWaitlistResponseDto> submitRequest(@Valid @RequestBody GameWaitlistRequestDto dto, @AuthenticationPrincipal HrmsUserDetails user) {
+        log.info("Request and dto incoming: {}",dto);
         return ResponseEntity.ok(gamePlayService.submitRequest(dto, user.getEmployeeId()));
     }
 
@@ -125,6 +128,12 @@ public class GameController{
     public ResponseEntity<String> completeExpiredBookings(){
         gamePlayService.completeExpiredBookings();
         return ResponseEntity.ok("Expired bookings marked as completed");
+    }
+
+    @PostMapping("/allocate/{slotId}")
+    public ResponseEntity<String> allocateSlot(@PathVariable Long slotId) {
+        gamePlayService.allocateSlot(slotId);
+        return ResponseEntity.ok("Allocation triggered for slot " + slotId);
     }
 
     @GetMapping("/FinalizeWaitlist")

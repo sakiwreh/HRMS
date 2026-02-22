@@ -23,5 +23,8 @@ public interface GameBookingRepository extends JpaRepository<GameBooking,Long> {
     @Query("SELECT b FROM GameBooking b JOIN b.participants bp WHERE bp.employee.id = :empId ORDER BY b.bookingDateTime DESC")
     List<GameBooking> findByParticipantEmployeeId(Long empId);
 
+    @Query("SELECT case when count(b) > 0 then true else false end from GameBooking b JOIN b.participants bp WHERE bp.employee.id = :empId AND b.slot.slotDate = :date AND b.status = 'ACTIVE'")
+    boolean hasActiveBookingOnDate(Long empId, LocalDate date);
+
     List<GameBooking> findBySlotId(Long slotId);
 }

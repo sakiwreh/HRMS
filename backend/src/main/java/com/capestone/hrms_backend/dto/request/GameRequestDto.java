@@ -28,7 +28,15 @@ public class GameRequestDto {
     @Min(value = 1, message = "Max players must be at least 1")
     private Integer maxPlayersPerSlot;
 
+    @NotNull(message = "Max participants per booking is required")
+    @Min(value = 1,message = "Minimum 1 person required for playing the game")
+    private Integer maxParticipantsPerBooking;
+
     @NotNull(message = "Cancellation lead time is required")
     @Min(value = 0, message = "Cancellation minutes cannot be negative")
     private Integer cancellationBeforeMins;
+
+    @NotNull(message = "Slot generation days is necessary")
+    @Min(value = 1, message = "Slot generation days must be at least 1")
+    private Integer slotGenerationDays;
 }

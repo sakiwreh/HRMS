@@ -10,21 +10,23 @@ import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.game.GameRepository;
 import com.capestone.hrms_backend.repository.game.GameSlotRepository;
 import com.capestone.hrms_backend.service.IGameAdminService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameAdminServiceImpl implements IGameAdminService {
-    private final GameRepository gameRepository;
-    private final GameSlotRepository slotRepository;
+
+    private final GameRepository gameRepo;
+    private final GameSlotRepository slotRepo;
 
     @Override
     @Transactional
@@ -32,7 +34,7 @@ public class GameAdminServiceImpl implements IGameAdminService {
         validateHours(dto);
         Game game = new Game();
         applyFields(game, dto);
-        return toDto(gameRepository.save(game));
+        return toDto(gameRepo.save(game));
     }
 
     @Override
@@ -41,7 +43,7 @@ public class GameAdminServiceImpl implements IGameAdminService {
         validateHours(dto);
         Game game = findGame(gameId);
         applyFields(game, dto);
-        return toDto(gameRepository.save(game));
+        return toDto(gameRepo.save(game));
     }
 
     @Override
@@ -49,62 +51,67 @@ public class GameAdminServiceImpl implements IGameAdminService {
     public GameResponseDto toggleActive(Long gameId) {
         Game game = findGame(gameId);
         game.setActive(!game.isActive());
-        return toDto(gameRepository.save(game));
+        return toDto(gameRepo.save(game));
     }
 
     @Override
     public List<GameResponseDto> getAllGames() {
-        return gameRepository.findAll().stream().map(this::toDto).toList();
+        return gameRepo.findAll().stream().map(this::toDto).toList();
     }
 
     @Override
     public List<GameResponseDto> getActiveGames() {
-        return gameRepository.findByActiveTrue().stream().map(this::toDto).toList();
+        return gameRepo.findByActiveTrue().stream().map(this::toDto).toList();
     }
 
     @Override
     public List<GameSlotResponseDto> getSlots(Long gameId, LocalDate from, LocalDate to) {
         Game game = findGame(gameId);
-        return slotRepository.findByGameIdAndSlotDateBetween(gameId, from, to).stream()
+        return slotRepo.findByGameIdAndSlotDateBetween(gameId, from, to).stream()
                 .map(s -> toSlotDto(s, game))
                 .toList();
     }
 
     @Override
     @Transactional
-    public void generateSlotsForDate(Long gameId, LocalDate date) {
+    public List<Long> generateSlotsForDate(Long gameId, LocalDate date) {
         Game game = findGame(gameId);
 
         if (!game.isActive())
             throw new BusinessException("Cannot generate slots for an inactive game");
         if (date.isBefore(LocalDate.now()))
             throw new BusinessException("Cannot generate slots for a past date");
-        if (slotRepository.existsByGameIdAndSlotDate(gameId, date))
+        if (slotRepo.existsByGameIdAndSlotDate(gameId, date))
             throw new BusinessException("Slots already generated for this date");
 
-        LocalTime init = game.getStartHour();
+        LocalTime cursor = game.getStartHour();
         LocalTime end = game.getEndHour();
         int mins = game.getMaxDurationMins();
 
-        while (!init.plusMinutes(mins).isAfter(end)) {
+        List<Long> slotIds = new ArrayList<>();
+        while (!cursor.plusMinutes(mins).isAfter(end)) {
             GameSlot slot = new GameSlot();
             slot.setGame(game);
             slot.setSlotDate(date);
-            slot.setSlotStart(date.atTime(init));
-            slot.setSlotEnd(date.atTime(init.plusMinutes(mins)));
-            slotRepository.save(slot);
-            init = init.plusMinutes(mins);
+            slot.setSlotStart(date.atTime(cursor));
+            slot.setSlotEnd(date.atTime(cursor.plusMinutes(mins)));
+            slotRepo.save(slot);
+            slotIds.add(slot.getId());
+            cursor = cursor.plusMinutes(mins);
         }
 
-        log.info("Generated slots | {} | {}", game.getName(), date);
+        log.info("Generated {} slots for game {} on {}", slotIds.size(), game.getName(), date);
+        return slotIds;
     }
 
     private Game findGame(Long id) {
-        return gameRepository.findById(id)
+        return gameRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found"));
     }
 
     private void validateHours(GameRequestDto dto) {
+        if (dto.getStartHour().equals(dto.getEndHour()))
+            return; // 24-hour availability
         if (!dto.getStartHour().isBefore(dto.getEndHour()))
             throw new BusinessException("Start hour must be before end hour");
     }
@@ -115,7 +122,9 @@ public class GameAdminServiceImpl implements IGameAdminService {
         game.setEndHour(dto.getEndHour());
         game.setMaxDurationMins(dto.getMaxDurationMins());
         game.setMaxPlayersPerSlot(dto.getMaxPlayersPerSlot());
+        game.setMaxParticipantsPerBooking(dto.getMaxParticipantsPerBooking());
         game.setCancellationBeforeMins(dto.getCancellationBeforeMins());
+        game.setSlotGenerationDays(dto.getSlotGenerationDays());
     }
 
     private GameResponseDto toDto(Game g) {
@@ -124,7 +133,9 @@ public class GameAdminServiceImpl implements IGameAdminService {
                 .startHour(g.getStartHour()).endHour(g.getEndHour())
                 .maxDurationMins(g.getMaxDurationMins())
                 .maxPlayersPerSlot(g.getMaxPlayersPerSlot())
+                .maxParticipantsPerBooking(g.getMaxParticipantsPerBooking())
                 .cancellationBeforeMins(g.getCancellationBeforeMins())
+                .slotGenerationDays(g.getSlotGenerationDays())
                 .build();
     }
 
@@ -135,6 +146,7 @@ public class GameAdminServiceImpl implements IGameAdminService {
                 .slotStart(s.getSlotStart()).slotEnd(s.getSlotEnd())
                 .capacity(g.getMaxPlayersPerSlot())
                 .bookedCount(s.getBookedCount())
+                .allocated(s.isAllocated())
                 .status(s.getStatus().name())
                 .build();
     }

@@ -7,7 +7,7 @@ import com.capestone.hrms_backend.dto.response.GameWaitlistResponseDto;
 
 import java.util.List;
 
-public interface IGamePlayService {
+public interface    IGamePlayService {
 
     //Interest
     public void registerInterest(Long gameId, Long employeeId);
@@ -23,6 +23,7 @@ public interface IGamePlayService {
     public void cancelBooking(Long bookingId, Long employeeId);
     public List<GameBookingResponseDto> getMyBookings(Long employeeId);
     public List<GameBookingResponseDto> getBookingsForSlot(Long slotId);
+    void allocateSlot(Long slotId);
 
     //System Updation
     public void completeExpiredBookings();

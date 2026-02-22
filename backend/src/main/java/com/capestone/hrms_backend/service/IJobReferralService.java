@@ -14,4 +14,5 @@ public interface IJobReferralService {
     List<JobReferralResponseDto> getMyReferrals(Long empId);
     void updateReferralStatus(Long refId, ReferralStatus status);
     List<JobReferralResponseDto> getAllReferrals();
+    List<JobReferralResponseDto> getReferralsByJob(Long jobId);
 }
