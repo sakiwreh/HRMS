@@ -9,8 +9,12 @@ import lombok.Setter;
 public class JobReferralResponseDto {
 
     private Long id;
+    private Long jobId;
+    private String jobTitle;
     private String candidateFullName;
     private String email;
     private ReferralStatus status;
     private String candidatePhoneNumber;
+    private String referrerName;
+    private String notes;
 }

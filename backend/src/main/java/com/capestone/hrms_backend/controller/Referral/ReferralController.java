@@ -50,4 +50,10 @@ public class ReferralController {
     public ResponseEntity<List<JobReferralResponseDto>> getAllReferrals(){
         return ResponseEntity.ok(jobReferralService.getAllReferrals());
     }
+
+    @GetMapping("/job/{id}/referrals")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<JobReferralResponseDto>> getReferralsByJob(@PathVariable Long id) {
+        return ResponseEntity.ok(jobReferralService.getReferralsByJob(id));
+    }
 }

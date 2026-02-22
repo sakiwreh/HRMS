@@ -4,5 +4,6 @@ public enum WaitlistStatus {
     WAIT,
     ALLOCATED,
     CANCELLED,
-    CYCLE_END
+    CYCLE_END,
+    EXPIRED
 }

@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createJob } from "../api/jobApi";
+import toast from "react-hot-toast";
  
 type Form = {
   title: string;
@@ -25,6 +26,7 @@ export default function JobCreateForm({ onDone }: { onDone?: () => void }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["jobs"] });
       reset();
+      toast.success("Job posted successfully");
       onDone?.();
     },
   });

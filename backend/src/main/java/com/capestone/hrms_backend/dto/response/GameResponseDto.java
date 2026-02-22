@@ -16,4 +16,5 @@ public class GameResponseDto {
     private int maxDurationMins;
     private int maxPlayersPerSlot;
     private int cancellationBeforeMins;
+    private int slotGenerationDays;
 }

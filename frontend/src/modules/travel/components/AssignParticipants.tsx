@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useEmployees from "../hooks/useEmployees";
 import useParticipants from "../hooks/useParticipants";
 import { useAssignParticipants } from "../hooks/useAssignParticipants";
+import toast from "react-hot-toast";
  
 type Props = {
   travelId: number;
@@ -13,55 +14,63 @@ type FormData = {
 };
  
 export default function AssignParticipants({ travelId }: Props) {
- 
   const { data: employees = [], isLoading: empLoading } = useEmployees();
-  const { data: existingParticipants = [], isLoading: partLoading } = useParticipants(travelId);
+  const { data: existingParticipants = [], isLoading: partLoading } =
+    useParticipants(travelId);
   const { mutateAsync, isPending } = useAssignParticipants();
+  const [search, setSearch] = useState("");
  
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-  } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: { employeeIds: [] },
   });
  
   const selected = watch("employeeIds");
-
-  //Existing participants
+ 
   useEffect(() => {
     if (!employees.length || !existingParticipants.length) return;
- 
     const ids = existingParticipants.map((p: any) =>
-      String(p.employee?.id ?? p.employeeId ?? p.user?.id ?? p.id)
+      String(p.employee?.id ?? p.employeeId ?? p.user?.id ?? p.id),
     );
- 
     setValue("employeeIds", ids, { shouldValidate: true });
- 
   }, [existingParticipants, employees, setValue]);
+ 
   const onSubmit = async (data: FormData) => {
     try {
       await mutateAsync({
         travelId,
         employeeIds: data.employeeIds.map(Number),
       });
- 
-      alert("Participants saved successfully");
-    } catch (e) {
-      console.error(e);
-      alert("Failed to save participants");
+      toast.success("Participants saved successfully");
+    } catch {
+      // error toast handled by axios interceptor
     }
   };
  
   if (empLoading || partLoading) return <div>Loading employees...</div>;
  
+  const filtered = employees.filter((emp: any) => {
+    const name = (emp.name ?? "").toLowerCase();
+    const email = (emp.email ?? "").toLowerCase();
+    return (
+      name.includes(search.toLowerCase()) ||
+      email.includes(search.toLowerCase())
+    );
+  });
+ 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <h2 className="text-lg font-semibold mb-3">Assign Employees</h2>
+      <h2 className="text-lg font-semibold mb-1">Assign Employees</h2>
+ 
+      <input
+        type="text"
+        placeholder="Search employees by name or email..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border rounded-md px-3 py-2 w-full text-sm"
+      />
  
       <div className="border rounded-lg divide-y max-h-[420px] overflow-y-auto">
-        {employees.map((emp: any) => {
+        {filtered.map((emp: any) => {
           const checked = selected?.includes(String(emp.id));
  
           return (
@@ -85,6 +94,11 @@ export default function AssignParticipants({ travelId }: Props) {
             </label>
           );
         })}
+        {filtered.length === 0 && (
+          <div className="p-4 text-center text-sm text-gray-400">
+            No employees match "{search}"
+          </div>
+        )}
       </div>
  
       <button

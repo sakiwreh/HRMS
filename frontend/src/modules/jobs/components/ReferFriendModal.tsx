@@ -63,8 +63,16 @@ export default function ReferFriendModal({ jobId, jobTitle, open, onClose }: Pro
           type="email"
           className="border p-2 w-full rounded"
           placeholder="Friend's email (optional)"
-          {...register("email")}
+          {...register("email", {
+            pattern: {
+              value: /^\S+@\S+\.\S+$/,
+              message: "Enter a valid email address",
+            },
+          })}
         />
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email.message}</p>
+        )}
  
         <input
           className="border p-2 w-full rounded"

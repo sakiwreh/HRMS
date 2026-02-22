@@ -1,6 +1,7 @@
 package com.capestone.hrms_backend.service.impl;
 
 import com.capestone.hrms_backend.dto.request.GameWaitlistRequestDto;
+import com.capestone.hrms_backend.dto.response.EmployeeLookupDto;
 import com.capestone.hrms_backend.dto.response.GameBookingResponseDto;
 import com.capestone.hrms_backend.dto.response.GameResponseDto;
 import com.capestone.hrms_backend.dto.response.GameWaitlistResponseDto;
@@ -10,13 +11,16 @@ import com.capestone.hrms_backend.exception.BusinessException;
 import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.game.*;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
+import com.capestone.hrms_backend.service.IEmailService;
 import com.capestone.hrms_backend.service.IGamePlayService;
-import jakarta.transaction.Transactional;
+import com.capestone.hrms_backend.service.INotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,24 +29,31 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class GamePlayServiceImpl implements IGamePlayService {
-     public final GameRepository gameRepository;
-     public final GameSlotRepository gameSlotRepository;
-     private final GameInterestRepository interestRepo;
-     private final GameCycleRepository cycleRepo;
-     private final GameHistoryRepository historyRepo;
-     private final GameWaitlistRepository waitlistRepo;
-     private final GameWaitlistParticipantRepository waitlistParticipantRepo;
-     private final GameBookingRepository bookingRepo;
-     private final EmployeeRepository employeeRepo;
+
+    private final GameRepository gameRepo;
+    private final GameSlotRepository slotRepo;
+    private final GameInterestRepository interestRepo;
+    private final GameCycleRepository cycleRepo;
+    private final GameHistoryRepository historyRepo;
+    private final GameWaitlistRepository waitlistRepo;
+    private final GameWaitlistParticipantRepository waitlistParticipantRepo;
+    private final GameBookingRepository bookingRepo;
+    private final EmployeeRepository employeeRepo;
+    private final INotificationService notificationService;
+    private final IEmailService emailService;
+
+    // ═══════════════════════ INTEREST ═══════════════════════
 
     @Override
     @Transactional
     public void registerInterest(Long gameId, Long employeeId) {
         Game game = findGame(gameId);
-        if (!game.isActive()) throw new BusinessException("Game is not active");
+        if (!game.isActive())
+            throw new BusinessException("Game is not active");
 
         Employee emp = findEmployee(employeeId);
-        if (interestRepo.existsByEmployeeIdAndGameId(employeeId, gameId)) throw new BusinessException("Already registered interest");
+        if (interestRepo.existsByEmployeeIdAndGameId(employeeId, gameId))
+            throw new BusinessException("Already registered interest");
 
         GameInterest interest = new GameInterest();
         interest.setEmployee(emp);
@@ -53,44 +64,78 @@ public class GamePlayServiceImpl implements IGamePlayService {
     @Override
     @Transactional
     public void removeInterest(Long gameId, Long employeeId) {
-        GameInterest interest = interestRepo.findByEmployeeIdAndGameId(employeeId, gameId).orElseThrow(() -> new ResourceNotFoundException("Interest registration not found"));
+        GameInterest interest = interestRepo.findByEmployeeIdAndGameId(employeeId, gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interest registration not found"));
 
-        //Check if already in waitlist
-        boolean hasPending = waitlistRepo.findByRequestedByIdAndStatus(employeeId, WaitlistStatus.WAIT).stream().anyMatch(w -> w.getGame().getId().equals(gameId));
-        if (hasPending) throw new BusinessException("Cancel pending requests before removing interest");
+        // prevent removing interest while the user has pending waitlist requests
+        boolean hasPending = waitlistRepo
+                .findByRequestedByIdAndStatus(employeeId, WaitlistStatus.WAIT)
+                .stream().anyMatch(w -> w.getGame().getId().equals(gameId));
+        if (hasPending)
+            throw new BusinessException("Cancel pending requests before removing interest");
+
+        // prevent removing interest while holding an active booking for this game
+        boolean hasActive = bookingRepo.findByParticipantEmployeeId(employeeId).stream()
+                .anyMatch(b -> b.getGame().getId().equals(gameId) && b.getStatus() == BookingStatus.ACTIVE);
+        if (hasActive)
+            throw new BusinessException("Cannot remove interest while you have an active booking for this game");
 
         interestRepo.delete(interest);
     }
 
     @Override
     public List<GameResponseDto> getMyInterests(Long employeeId) {
-        return interestRepo.findByEmployeeId(employeeId).stream().map(i -> toGameDto(i.getGame())).toList();
+        return interestRepo.findByEmployeeId(employeeId).stream()
+                .map(i -> toGameDto(i.getGame())).toList();
+    }
+
+    @Override
+    public List<EmployeeLookupDto> getInterestedEmployees(Long gameId) {
+        findGame(gameId);
+        return interestRepo.findByGameId(gameId).stream()
+                .map(GameInterest::getEmployee)
+                .map(e -> new EmployeeLookupDto(
+                        e.getId(),
+                        fullName(e),
+                        e.getUser() != null ? e.getUser().getEmail() : null,
+                        e.getDesignation(),
+                        e.getDepartment() != null ? e.getDepartment().getName() : null))
+                .sorted(Comparator.comparing(EmployeeLookupDto::getName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     @Override
     @Transactional
     public GameWaitlistResponseDto submitRequest(GameWaitlistRequestDto dto, Long requestedById) {
+        log.info("DTO: {}",dto);
         GameSlot slot = findSlot(dto.getSlotId());
         Game game = slot.getGame();
 
-        //Check slot available or not
-        validateSlotForRequest(slot);
+        validateSlotForRequest(slot, game);
+        log.info("slot: {}",slot);
+        log.info("Gme: {}",game);
 
-        //Check interest present or not
         Employee requester = findEmployee(requestedById);
         requireInterest(requestedById, game.getId());
 
-        // Add employee booking slot in participant
+        // requester is always a participant
         Set<Long> pids = new LinkedHashSet<>(dto.getParticipantIds());
         pids.add(requestedById);
 
-        //Validate all participants
+        // max participants per booking from game config
+        if (pids.size() > game.getMaxPlayersPerSlot())
+            throw new BusinessException("Maximum " + game.getMaxPlayersPerSlot()
+                    + " participants allowed per booking");
+
+        log.info("Validating participants");
         validateParticipants(pids, game, slot);
-
+        log.info("PArticipants validated");
         int cycleNum = getOrCreateCycleNumber(game);
-        int priority = getPlayCount(requestedById, game.getId(), cycleNum);
+        int priority = pids.stream()
+                .mapToInt(pid -> getPlayCount(pid, game.getId(), cycleNum))
+                .max().orElse(0);
 
-        //Create waitlist entry with participants
+        // create waitlist entry with participants
         GameWaitList wl = new GameWaitList();
         wl.setGame(game);
         wl.setSlot(slot);
@@ -107,11 +152,6 @@ public class GamePlayServiceImpl implements IGamePlayService {
         }
         waitlistRepo.save(wl);
 
-        //Allocating
-        allocateSlot(slot.getId());
-
-        //Re-fetch status
-        wl = waitlistRepo.findById(wl.getId()).orElseThrow(() -> new ResourceNotFoundException("Waitlist entry not found"));
         return toWaitlistDto(wl);
     }
 
@@ -132,10 +172,10 @@ public class GamePlayServiceImpl implements IGamePlayService {
 
     @Override
     public List<GameWaitlistResponseDto> getMyRequests(Long employeeId) {
-        return waitlistRepo.findByRequestedByIdOrderByAppliedDateTimeDesc(employeeId).stream().map(this::toWaitlistDto).toList();
+        return waitlistRepo.findByRequestedByIdOrderByAppliedDateTimeDesc(employeeId).stream()
+                .map(this::toWaitlistDto).toList();
     }
 
-    //Booking
     @Override
     @Transactional
     public void cancelBooking(Long bookingId, Long employeeId) {
@@ -143,36 +183,50 @@ public class GamePlayServiceImpl implements IGamePlayService {
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
         if (!bk.getBookedBy().getId().equals(employeeId))
-            throw new BusinessException("Cancellation must be by requestor");
+            throw new BusinessException("Only the person who booked can cancel");
         if (bk.getStatus() != BookingStatus.ACTIVE)
-            throw new BusinessException("Booking not active");
+            throw new BusinessException("Booking is not active");
 
-        //Check if within configured cancellation time
-        int cancMins = bk.getGame().getCancellationBeforeMins();
-        if (LocalDateTime.now().isAfter(bk.getSlot().getSlotStart().minusMinutes(cancMins)))
-            throw new BusinessException("Cancellation window has passed. Must cancel at least "+ cancMins +" minutes before slot start");
+        // cancellation window check
+        int leadMins = bk.getGame().getCancellationBeforeMins();
+        if (LocalDateTime.now().isAfter(bk.getSlot().getSlotStart().minusMinutes(leadMins)))
+            throw new BusinessException("Cancellation window has passed. Must cancel at least "
+                    + leadMins + " minutes before slot start");
 
         bk.setStatus(BookingStatus.CANCELLED);
         bookingRepo.save(bk);
 
-        //Free slot and trigger allocation
+        // free up slot capacity and re-trigger allocator
         GameSlot slot = bk.getSlot();
         slot.setBookedCount(Math.max(0, slot.getBookedCount() - bk.getParticipants().size()));
-        if (slot.getStatus() == SlotStatus.LOCKED) slot.setStatus(SlotStatus.AVAILABLE);
-        gameSlotRepository.save(slot);
+        if (slot.getStatus() == SlotStatus.LOCKED)
+            slot.setStatus(SlotStatus.AVAILABLE);
+        slotRepo.save(slot);
+
+        // notify participants about cancellation
+        String cancelSubject = "Game Booking Cancelled — " + bk.getGame().getName();
+        String cancelBody = "Your booking for " + bk.getGame().getName()
+                + " on " + slot.getSlotStart().toLocalDate()
+                + " (" + slot.getSlotStart().toLocalTime() + " - " + slot.getSlotEnd().toLocalTime()
+                + ") has been cancelled.";
+        for (GameBookingParticipant bp : bk.getParticipants()) {
+            notificationService.create(bp.getEmployee().getId(), cancelSubject, cancelBody);
+        }
 
         allocateSlot(slot.getId());
     }
 
     @Override
     public List<GameBookingResponseDto> getMyBookings(Long employeeId) {
-        return bookingRepo.findByParticipantEmployeeId(employeeId).stream().map(this::toBookingDto).toList();
+        return bookingRepo.findByParticipantEmployeeId(employeeId).stream()
+                .map(this::toBookingDto).toList();
     }
 
     @Override
     public List<GameBookingResponseDto> getBookingsForSlot(Long slotId) {
-        findSlot(slotId);
-        return bookingRepo.findBySlotId(slotId).stream().map(this::toBookingDto).toList();
+        findSlot(slotId); // existence check
+        return bookingRepo.findBySlotId(slotId).stream()
+                .map(this::toBookingDto).toList();
     }
 
     @Override
@@ -191,88 +245,123 @@ public class GamePlayServiceImpl implements IGamePlayService {
             // if all active bookings on this slot are done, mark slot complete
             if (bookingRepo.findBySlotIdAndStatus(bk.getSlot().getId(), BookingStatus.ACTIVE).isEmpty()) {
                 bk.getSlot().setStatus(SlotStatus.COMPLETED);
-                gameSlotRepository.save(bk.getSlot());
+                slotRepo.save(bk.getSlot());
             }
+
             checkCycleRollover(game);
         }
     }
 
+    //Marks leftover WAIT entries as EXPIRED after their slot time has passed.
     @Override
     @Transactional
     public void finalizeExpiredWaitlistEntries() {
         List<GameWaitList> expired = waitlistRepo.findExpiredWaitEntries(LocalDateTime.now());
         for (GameWaitList entry : expired) {
-            entry.setStatus(WaitlistStatus.CYCLE_END);
+            entry.setStatus(WaitlistStatus.EXPIRED);
             waitlistRepo.save(entry);
         }
     }
 
-    //Allocatior
-    /**
-     * Processes the waitlist for a slot in priority order (lowest play-count first,then earliest request, then lowest ID as tiebreaker). Creates bookings for entries that fit within remaining capacity.
-     */
-    private void allocateSlot(Long slotId) {
-        GameSlot slot = findSlot(slotId);
-        Game game = slot.getGame();
+@Override
+@Transactional
+public void allocateSlot(Long slotId) {
+    GameSlot slot = findSlot(slotId);
+    Game game = slot.getGame();
 
-        if (slot.getStatus() == SlotStatus.COMPLETED || slot.getStatus() == SlotStatus.CANCELLED) return;
+    if (slot.getStatus() == SlotStatus.COMPLETED || slot.getStatus() == SlotStatus.CANCELLED)
+        return;
 
-        List<GameWaitList> queue = waitlistRepo
-                .findBySlotIdAndStatusOrderByPriorityScoreAscAppliedDateTimeAscIdAsc(slotId, WaitlistStatus.WAIT);
+    List<GameWaitList> queue = waitlistRepo
+            .findBySlotIdAndStatusOrderByPriorityScoreAscAppliedDateTimeAscIdAsc(slotId, WaitlistStatus.WAIT);
 
-        int capacity = game.getMaxPlayersPerSlot();
-        int occupied = slot.getBookedCount();
+    int capacity = game.getMaxPlayersPerSlot();
+    int occupied = slot.getBookedCount();
 
-        for (GameWaitList entry : queue) {
-            int needed = entry.getParticipants().size();
-            if (occupied + needed > capacity) continue;
+    for (GameWaitList entry : queue) {
+        int needed = entry.getParticipants().size();
+        if (occupied + needed > capacity)
+            continue;
 
-            // skip if any participant already has an active booking for this game today
-            boolean conflict = entry.getParticipants().stream()
-                    .anyMatch(p -> bookingRepo.hasActiveBookingForGameOnDate(
-                            p.getEmployee().getId(), game.getId(), slot.getSlotDate()));
-            if (conflict) continue;
+        // check if any participant already has an active booking for ANY game today
+        boolean conflict = entry.getParticipants().stream()
+                .anyMatch(p -> bookingRepo.hasActiveBookingOnDate(
+                        p.getEmployee().getId(), slot.getSlotDate()));
+        if (conflict)
+            continue;
 
-            // convert waitlist entry
-            GameBooking bk = new GameBooking();
-            bk.setGame(game);
-            bk.setSlot(slot);
-            bk.setBookedBy(entry.getRequestedBy());
-            bk.setBookingDateTime(LocalDateTime.now());
-            bookingRepo.save(bk);
+        // convert waitlist entry → booking
+        GameBooking bk = new GameBooking();
+        bk.setGame(game);
+        bk.setSlot(slot);
+        bk.setBookedBy(entry.getRequestedBy());
+        bk.setBookingDateTime(LocalDateTime.now());
+        bookingRepo.save(bk);
 
-            for (GameWaitListParticipant wp : entry.getParticipants()) {
-                GameBookingParticipant bp = new GameBookingParticipant();
-                bp.setBooking(bk);
-                bp.setEmployee(wp.getEmployee());
-                bk.getParticipants().add(bp);
+        for (GameWaitListParticipant wp : entry.getParticipants()) {
+            GameBookingParticipant bp = new GameBookingParticipant();
+            bp.setBooking(bk);
+            bp.setEmployee(wp.getEmployee());
+            bk.getParticipants().add(bp);
+        }
+        bookingRepo.save(bk);
+
+        entry.setStatus(WaitlistStatus.ALLOCATED);
+        entry.setBooking(bk);
+        waitlistRepo.save(entry);
+
+        occupied += needed;
+
+        // send notification + email to all participants
+        String subject = "Game Booking Confirmed — " + game.getName();
+        String body = "You have been allocated a slot for " + game.getName()
+                + " on " + slot.getSlotStart().toLocalDate()
+                + " from " + slot.getSlotStart().toLocalTime()
+                + " to " + slot.getSlotEnd().toLocalTime() + ".";
+        for (GameBookingParticipant bp : bk.getParticipants()) {
+            notificationService.create(bp.getEmployee().getId(), subject, body);
+            try {
+                emailService.send(bp.getEmployee().getUser().getEmail(), subject, body);
+            } catch (Exception e) {
+                log.warn("Failed to send game booking email to {}: {}",
+                        bp.getEmployee().getUser().getEmail(), e.getMessage());
             }
-            bookingRepo.save(bk);
-
-            entry.setStatus(WaitlistStatus.ALLOCATED);
-            entry.setBooking(bk);
-            waitlistRepo.save(entry);
-
-            occupied += needed;
-            if (occupied >= capacity) break;
         }
 
-        slot.setBookedCount(occupied);
-        if (occupied >= capacity) slot.setStatus(SlotStatus.LOCKED);
-        gameSlotRepository.save(slot);
+        if (occupied >= capacity)
+            break;
     }
 
-    //Cycle management
-    /**
-     * When ALL interested employees have played at least once in the current cycle,
-     * close it and start a new one. This resets everyone's priority back to 0.
-     */
+    slot.setBookedCount(occupied);
+    if (occupied >= capacity)
+        slot.setStatus(SlotStatus.LOCKED);
+    slotRepo.save(slot);
+
+    // mark remaining WAIT entries as EXPIRED (they weren't allocated)
+    List<GameWaitList> remaining = waitlistRepo
+            .findBySlotIdAndStatusOrderByPriorityScoreAscAppliedDateTimeAscIdAsc(slotId, WaitlistStatus.WAIT);
+    for (GameWaitList leftover : remaining) {
+        leftover.setStatus(WaitlistStatus.EXPIRED);
+        waitlistRepo.save(leftover);
+
+        // notify the requestor that their request was not allocated
+        String expSubject = "Game Request Not Allocated — " + game.getName();
+        String expBody = "Your request for " + game.getName()
+                + " on " + slot.getSlotStart().toLocalDate()
+                + " (" + slot.getSlotStart().toLocalTime() + " - " + slot.getSlotEnd().toLocalTime()
+                + ") could not be allocated.";
+        notificationService.create(leftover.getRequestedBy().getId(), expSubject, expBody);
+    }
+}
+
     private void checkCycleRollover(Game game) {
         GameCycle active = cycleRepo.findByGameIdAndEndedAtIsNull(game.getId()).orElse(null);
-        if (active == null) return;
+        if (active == null)
+            return;
 
         long interested = interestRepo.countByGameId(game.getId());
-        if (interested == 0) return;
+        if (interested == 0)
+            return;
 
         long played = historyRepo.countByGameIdAndCycleNumberAndPlayCountGreaterThanEqual(
                 game.getId(), active.getCycleNumber(), 1);
@@ -292,7 +381,7 @@ public class GamePlayServiceImpl implements IGamePlayService {
         }
     }
 
-    /** Returns the active cycle number, creating cycle 1 if none exists. */
+    // Returns the active cycle number, creating cycle 1 if none exists.
     private int getOrCreateCycleNumber(Game game) {
         return cycleRepo.findByGameIdAndEndedAtIsNull(game.getId())
                 .map(GameCycle::getCycleNumber)
@@ -323,33 +412,43 @@ public class GamePlayServiceImpl implements IGamePlayService {
         }
     }
 
-    // ══════════════════ VALIDATION HELPERS ════════════════════
 
-    private void validateSlotForRequest(GameSlot slot) {
+    private void validateSlotForRequest(GameSlot slot, Game game) {
         if (slot.getStatus() != SlotStatus.AVAILABLE)
             throw new BusinessException("Slot is not available for booking");
         if (slot.getSlotStart().isBefore(LocalDateTime.now()))
             throw new BusinessException("Cannot request a slot that has already started");
+
+        // block requests after cutoff (cutoff = slotStart - cancellationBeforeMins)
+        LocalDateTime cutoff = slot.getSlotStart().minusMinutes(game.getCancellationBeforeMins());
+        if (LocalDateTime.now().isAfter(cutoff))
+            throw new BusinessException("Request window has closed. Requests must be placed at least "
+                    + game.getCancellationBeforeMins() + " minutes before slot start");
     }
 
     private void validateParticipants(Set<Long> pids, Game game, GameSlot slot) {
-        if (pids.size() > game.getMaxPlayersPerSlot())
-            throw new BusinessException("Participant count exceeds max players per slot (" + game.getMaxPlayersPerSlot() + ")");
-
         for (Long pid : pids) {
             requireInterest(pid, game.getId());
-            if (bookingRepo.hasActiveBookingForGameOnDate(pid, game.getId(), slot.getSlotDate()))
-                throw new BusinessException("A participant already has an active booking for this game today");
+            log.info("{}",pid);
+
+            // one booking per employee per day across ALL games
+            if (bookingRepo.hasActiveBookingOnDate(pid, slot.getSlotDate()))
+                throw new BusinessException("A participant already has an active booking for this day");
+            log.info("Actvie booking checked");
         }
 
-        if (waitlistRepo.existsBySlotIdAndRequestedByIdAndStatus(slot.getId(), pids.iterator().next(), WaitlistStatus.WAIT))
+        if (waitlistRepo.existsBySlotIdAndRequestedByIdAndStatus(slot.getId(), pids.iterator().next(),
+                WaitlistStatus.WAIT))
             throw new BusinessException("You already have a pending request for this slot");
+        log.info("Exists by slotid and requestedbyid checked");
 
+        // ensure no participant is already in another WAIT/ALLOCATED entry on same slot
         List<Long> taken = waitlistParticipantRepo.findActiveParticipantEmployeeIdsBySlotId(slot.getId());
         for (Long pid : pids) {
             if (taken.contains(pid))
                 throw new BusinessException("A participant is already in a pending or allocated request for this slot");
         }
+        log.info("Check no participant in wait or allocated");
     }
 
     private void requireInterest(Long empId, Long gameId) {
@@ -362,21 +461,19 @@ public class GamePlayServiceImpl implements IGamePlayService {
                 .map(GameHistory::getPlayCount).orElse(0);
     }
 
-    // ═══════════════════ ENTITY LOOKUPS ══════════════════════
 
     private Game findGame(Long id) {
-        return gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
+        return gameRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
     }
 
     private GameSlot findSlot(Long id) {
-        return gameSlotRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Slot not found"));
+        return slotRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Slot not found"));
     }
 
     private Employee findEmployee(Long id) {
         return employeeRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
     }
 
-    // ═══════════════════ DTO MAPPERS ═════════════════════════
 
     private GameResponseDto toGameDto(Game g) {
         return GameResponseDto.builder()
@@ -385,6 +482,7 @@ public class GamePlayServiceImpl implements IGamePlayService {
                 .maxDurationMins(g.getMaxDurationMins())
                 .maxPlayersPerSlot(g.getMaxPlayersPerSlot())
                 .cancellationBeforeMins(g.getCancellationBeforeMins())
+                .slotGenerationDays(g.getSlotGenerationDays())
                 .build();
     }
 

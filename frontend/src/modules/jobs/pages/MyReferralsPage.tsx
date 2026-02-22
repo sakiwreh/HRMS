@@ -26,6 +26,7 @@ export default function MyReferralsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-600 text-left">
               <tr>
+                <th className="px-4 py-3 font-medium">Job</th>
                 <th className="px-4 py-3 font-medium">Candidate</th>
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Phone</th>
@@ -35,6 +36,9 @@ export default function MyReferralsPage() {
             <tbody className="divide-y">
               {referrals?.map((r: any) => (
                 <tr key={r.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-700">
+                    {r.jobTitle || "-"}
+                  </td>
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {r.candidateFullName}
                   </td>

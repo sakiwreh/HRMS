@@ -41,6 +41,12 @@ public class JobOpeningController {
         return ResponseEntity.ok(jobOpeningService.getAllOpenings());
     }
 
+    @GetMapping("/all/hr")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<JobOpeningResponseDto>> getAllForHr() {
+        return ResponseEntity.ok(jobOpeningService.getAllOpeningsForHr());
+    }
+
     @PreAuthorize("hasRole('HR')")
     @PatchMapping("/{id}/update")
     public ResponseEntity<String> updateStatus(@PathVariable Long id,@Valid @RequestBody JobStatusRequestDto dto){

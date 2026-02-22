@@ -1,4 +1,4 @@
-import { Outlet, RouterProvider } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import './App.css'
 import { useAuthInit } from './modules/auth/hooks/useAuthInit'
 

@@ -12,6 +12,9 @@ import JobDetailPage from "../modules/jobs/pages/JobDetailsPage";
 import MyReferralsPage from "../modules/jobs/pages/MyReferralsPage";
 import AllReferralsPage from "../modules/jobs/pages/AllReferralsPage";
 import OrgChartPage from "../modules/org/pages/OrgChartPage";
+import ExpenseDetailPage from "../modules/expense/pages/ExpenseDetailPage";
+import GamesLayout from "../modules/games/pages/GamesLayout";
+import MyGameActivity from "../modules/games/pages/MyGameActivity";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -59,6 +62,10 @@ export const router = createBrowserRouter([
             path:"review",
             element:<ExpenseReviewPage/>
           },
+          {
+            path:":id",
+            element:<ExpenseDetailPage/>
+          }
         ],
       },
       //Jobs
@@ -89,6 +96,20 @@ export const router = createBrowserRouter([
         path:"org",
         element:<OrgChartPage/>
       },
+      // 
+      {
+        path: "games",
+        children: [
+          {
+            index: true,
+            element: <GamesLayout/>
+          },
+          {
+            path: "activity",
+            element: <MyGameActivity/>
+          }
+        ]
+      }
     ],
   },
   {

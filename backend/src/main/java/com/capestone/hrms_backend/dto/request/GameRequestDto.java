@@ -31,4 +31,8 @@ public class GameRequestDto {
     @NotNull(message = "Cancellation lead time is required")
     @Min(value = 0, message = "Cancellation minutes cannot be negative")
     private Integer cancellationBeforeMins;
+
+    @NotNull(message = "Slot generation days is necessary")
+    @Min(value = 1, message = "Slot generation days must be at least 1")
+    private Integer slotGenerationDays;
 }

@@ -11,6 +11,6 @@ public class NotificationResponseDto {
     private Long id;
     private String subject;
     private String body;
-    private Boolean isRead;
+    private Boolean read;
     private LocalDateTime createdAt;
 }

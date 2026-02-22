@@ -11,11 +11,15 @@ import java.time.LocalDateTime;
 public class ExpenseResponseDto {
     private Long id;
     private Long employeeId;
+    private String employeeName;
+    private Long travelId;
+    private String travelTitle;
     private String category;
     private Double amount;
     private String description;
     private LocalDateTime expenseDate;
     private ExpenseStatus status;
-    private Long reviewedBy;
+    private String reviewedBy;
     private String remarks;
+    private int proofCount;
 }

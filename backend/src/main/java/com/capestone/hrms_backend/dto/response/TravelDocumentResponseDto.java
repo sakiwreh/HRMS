@@ -14,4 +14,6 @@ public class TravelDocumentResponseDto {
     private Long fileSize;
     private Long uploadedById;
     private Long uploadedForId;
+    private String uploadedByName;
+    private String uploadedForName;
 }

@@ -89,6 +89,19 @@ public class JobOpeningServiceImpl implements IJobOpeningService {
     }
 
     @Override
+    public List<JobOpeningResponseDto> getAllOpeningsForHr() {
+        return jobOpeningRepository.findAll().stream().map(opening -> {
+            JobOpeningResponseDto dto = modelMapper.map(opening, JobOpeningResponseDto.class);
+            if (opening.getCreatedBy() != null) {
+                dto.setCreatedByName(
+                        opening.getCreatedBy().getFirstName() + " " + opening.getCreatedBy().getLastName());
+            }
+            return dto;
+        }).toList();
+    }
+
+
+    @Override
     @Transactional
     public void removeReviewer(Long jobOpeningId, Long empId) {
         reviewerRepository.deleteByJobIdAndReveiwerId(jobOpeningId,empId);

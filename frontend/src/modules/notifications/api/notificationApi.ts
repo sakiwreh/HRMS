@@ -4,7 +4,7 @@ export interface Notification {
   id: number;
   subject: string;
   body: string;
-  isRead: boolean;
+  read: boolean;
   createdAt: string;
 }
  
