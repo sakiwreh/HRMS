@@ -1,8 +1,12 @@
 package com.capestone.hrms_backend.dto.response;
 
+import com.capestone.hrms_backend.entity.community.Tag;
 import com.capestone.hrms_backend.entity.community.Visibility;
+import com.capestone.hrms_backend.entity.organization.Employee;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -15,7 +19,7 @@ public class PostResponseDto {
 
     private Long id;
 
-    private ActorDto author;
+    private Long author_id;
 
     private String title;
     private String description;
@@ -26,12 +30,12 @@ public class PostResponseDto {
     private int likeCount;
     private int commentCount;
 
-    private List<TagDto> tags;
+    private List<Tag> tags;
 
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // For soft delete awareness on admin screens (omit for public feed if you prefer)
-    private OffsetDateTime deletedAt;
+    private LocalDateTime deletedAt;
 
 }

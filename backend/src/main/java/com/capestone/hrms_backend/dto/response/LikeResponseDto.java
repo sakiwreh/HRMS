@@ -13,7 +13,7 @@ public class LikeResponseDto {
 
     private Long id;
     private Long postId;
-    private ActorDto employee;         // who liked
+    private ActorDto employee;
     private OffsetDateTime createdAt;
 
 }

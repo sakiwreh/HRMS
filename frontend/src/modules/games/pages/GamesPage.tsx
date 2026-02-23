@@ -110,7 +110,6 @@ export default function GamesPage() {
                 </p>
                 <p>Slot Duration: {g.maxDurationMins} mins</p>
                 <p>Max Players/Slot: {g.maxPlayersPerSlot}</p>
-                <p>Max Per Booking: {g.maxParticipantsPerBooking}</p>
                 <p>Cancellation Lead: {g.cancellationBeforeMins} mins</p>
               </div>
  
