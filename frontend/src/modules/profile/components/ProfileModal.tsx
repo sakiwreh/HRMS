@@ -11,14 +11,14 @@ function Field({ label, value }: { label: string; value: string | null | undefin
     <div>
       <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
       <div className="border rounded-lg px-3 py-2 text-sm text-gray-800 bg-gray-50">
-        {value || "—"}
+        {value || "-"}
       </div>
     </div>
   );
 }
  
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleDateString("en-IN", {
       day: "2-digit",

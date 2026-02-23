@@ -23,6 +23,7 @@ export const navigation: Record<Role, NavItem[]> = {
     { label: "Jobs", path: "/dashboard/jobs" },
     {label:"My Referrals", path: "/dashboard/referrals"},
     { label: "Organization", path: "/dashboard/org" },
+    { label: "Games", path: "/dashboard/games" },
   ],
  
   EMPLOYEE: [

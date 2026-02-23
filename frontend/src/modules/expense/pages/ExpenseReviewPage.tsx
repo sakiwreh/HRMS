@@ -65,9 +65,9 @@ export default function ExpenseReviewPage() {
  
   const applyFilters = () => {
     const clean: ExpenseFilterParams = {};
-    if (filters.employeeId) clean.employeeId = filters.employeeId;
+    // if (filters.employeeId) clean.employeeId = filters.employeeId;
     if (filters.status) clean.status = filters.status;
-    if (filters.travelId) clean.travelId = filters.travelId;
+    // if (filters.travelId) clean.travelId = filters.travelId;
     if (filters.fromDate) clean.fromDate = filters.fromDate+"T00:00:00";
     if (filters.toDate) clean.toDate = filters.toDate+"T23:59:59";
     setActiveFilters(clean);
@@ -111,7 +111,7 @@ export default function ExpenseReviewPage() {
       {showFilter && isHR && (
         <div className="bg-white rounded-xl shadow p-4 space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <input
+            {/* <input
               type="number"
               placeholder="Employee ID"
               className="border p-2 rounded text-sm"
@@ -124,7 +124,7 @@ export default function ExpenseReviewPage() {
                     : undefined,
                 }))
               }
-            />
+            /> */}
             <select
               className="border p-2 rounded text-sm"
               value={filters.status ?? ""}
@@ -140,7 +140,7 @@ export default function ExpenseReviewPage() {
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
             </select>
-            <input
+            {/* <input
               type="number"
               placeholder="Travel ID"
               className="border p-2 rounded text-sm"
@@ -151,7 +151,7 @@ export default function ExpenseReviewPage() {
                   travelId: e.target.value ? Number(e.target.value) : undefined,
                 }))
               }
-            />
+            /> */}
             <input
               type="date"
               className="border p-2 rounded text-sm"

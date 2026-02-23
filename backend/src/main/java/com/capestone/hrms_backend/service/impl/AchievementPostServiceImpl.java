@@ -245,9 +245,7 @@ public class AchievementPostServiceImpl implements IAchievementPostService {
 
     private PostResponseDto toPostDto(AchievementPost post) {
         PostResponseDto dto = modelMapper.map(post, PostResponseDto.class);
-        if (post.getAuthor() != null) {
-            dto.setAuthor(modelMapper.map(post.getAuthor(), ActorDto.class));
-        }
+        dto.setAuthor_id(post.getAuthor().getId());
         return dto;
     }
 

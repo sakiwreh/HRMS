@@ -247,7 +247,7 @@ export default function CreateExpenseForm({ onDone }: { onDone?: () => void }) {
         >
           {mutation.isPending ? "Submitting..." : "Submit Expense"}
         </button>
-        <button
+        {/* <button
           type="button"
           disabled={mutation.isPending}
           onClick={() => {
@@ -266,7 +266,7 @@ export default function CreateExpenseForm({ onDone }: { onDone?: () => void }) {
           className="border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 rounded px-4 disabled:opacity-50"
         >
           Save Draft
-        </button>
+        </button> */}
       </div>
     </form>
   );

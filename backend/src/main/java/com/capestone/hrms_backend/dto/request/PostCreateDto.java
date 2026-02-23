@@ -21,10 +21,8 @@ public class PostCreateDto {
     @NotBlank
     private String description;
 
-    // Optional at creation; default should be ALL in service if null
     private Visibility visibility;
 
-    // New or existing tags by name (client can send normalized list)
     private Set<@NotBlank String> tags;
 
 }

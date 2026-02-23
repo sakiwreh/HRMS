@@ -224,7 +224,7 @@ public class GamePlayServiceImpl implements IGamePlayService {
 
     @Override
     public List<GameBookingResponseDto> getBookingsForSlot(Long slotId) {
-        findSlot(slotId); // existence check
+        findSlot(slotId);
         return bookingRepo.findBySlotId(slotId).stream()
                 .map(this::toBookingDto).toList();
     }

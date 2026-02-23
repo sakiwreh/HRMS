@@ -45,5 +45,4 @@ public class CelebrationJob extends Base{
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private AchievementPost post;
-
 }

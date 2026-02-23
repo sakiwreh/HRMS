@@ -151,7 +151,7 @@ export default function GameSlotsView({ game, onBack }: Props) {
                   </div>
  
                   {/* Book button for non-HR when slot is available */}
-                  {!isHR && s.status === "AVAILABLE" && (
+                  { s.status === "AVAILABLE" && (
                     <button
                       onClick={() => setBookSlot(s)}
                       className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"

@@ -111,7 +111,7 @@ export default function ExpenseDetailPage() {
         <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Travel Plan</p>
-            <p className="font-medium">{expense.travelTitle || "—"}</p>
+            <p className="font-medium">{expense.travelTitle || "-"}</p>
           </div>
           <div>
             <p className="text-gray-500">Expense Date</p>
@@ -121,7 +121,7 @@ export default function ExpenseDetailPage() {
           </div>
           <div>
             <p className="text-gray-500">Reviewed By</p>
-            <p className="font-medium">{expense.reviewedBy || "—"}</p>
+            <p className="font-medium">{expense.reviewedBy || "Pending to review"}</p>
           </div>
           {expense.remarks && (
             <div className="col-span-2">
