@@ -49,7 +49,7 @@ public class JobReferralServiceImpl implements IJobReferralService {
         String jobTitle = job.getTitle();
         String shareSubject = "Job Opportunity: " + jobTitle;
         String shareBody = String.format(
-                "Hi,\n\nCheck out this job opening:\n\nTitle: %s\n\nDescription: %s\n\nExperience Required: %.1f years\n\nShared by an employee at the organization.",
+                "Hi,\n\nCheck out this job opening:\n\nTitle: %s\n\nDescription: %s\n\nExperience/s Required: %.1f years\n\nShared by an employee at the organization.",
                 jobTitle, job.getDescription(), job.getExperienceRequired());
         File jdFile = new File(job.getJobDescriptionUrl());
 
