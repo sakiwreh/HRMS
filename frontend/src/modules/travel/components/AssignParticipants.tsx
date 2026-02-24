@@ -41,8 +41,8 @@ export default function AssignParticipants({ travelId }: Props) {
         employeeIds: data.employeeIds.map(Number),
       });
       toast.success("Participants saved successfully");
-    } catch {
-      // error toast handled by axios interceptor
+    } catch (error) {
+      toast.error("Failed to save participants");
     }
   };
  

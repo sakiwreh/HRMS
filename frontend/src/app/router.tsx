@@ -15,6 +15,7 @@ import OrgChartPage from "../modules/org/pages/OrgChartPage";
 import ExpenseDetailPage from "../modules/expense/pages/ExpenseDetailPage";
 import GamesLayout from "../modules/games/pages/GamesLayout";
 import MyGameActivity from "../modules/games/pages/MyGameActivity";
+import SocialPage from "../modules/social/pages/SocialPage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -109,6 +110,10 @@ export const router = createBrowserRouter([
             element: <MyGameActivity/>
           }
         ]
+      },
+      {
+        path: "social",
+        element: <SocialPage/>
       }
     ],
   },

@@ -11,5 +11,4 @@ public class ActorDto {
     private Long id;
     private String fullName;
     private String email;
-
 }

@@ -39,9 +39,9 @@ export interface ExpenseCategory {
 }
  
 export interface ExpenseFilterParams {
-  employeeId?: number;
+  // employeeId?: number;
   status?: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
-  travelId?: number;
+  // travelId?: number;
   fromDate?: string;
   toDate?: string;
 }

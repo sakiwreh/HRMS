@@ -14,6 +14,7 @@ export const navigation: Record<Role, NavItem[]> = {
     {label: "Referrals", path: "/dashboard/referrals/review"},
     { label: "Organization", path: "/dashboard/org" },
     { label: "Games", path: "/dashboard/games" },
+    {label: "Achievements", path: "/dashboard/social"},
   ],
  
   MANAGER: [
@@ -24,6 +25,7 @@ export const navigation: Record<Role, NavItem[]> = {
     {label:"My Referrals", path: "/dashboard/referrals"},
     { label: "Organization", path: "/dashboard/org" },
     { label: "Games", path: "/dashboard/games" },
+    {label: "Achievements", path: "/dashboard/social"},
   ],
  
   EMPLOYEE: [
@@ -34,5 +36,6 @@ export const navigation: Record<Role, NavItem[]> = {
     {label:"My Referrals", path: "/dashboard/referrals"},
     {label:"Organization", path:"/dashboard/org"},
     { label: "Games", path: "/dashboard/games" },
+    {label: "Achievements", path: "/dashboard/social"},
   ],
 };

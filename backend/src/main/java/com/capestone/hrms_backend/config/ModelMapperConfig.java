@@ -1,7 +1,6 @@
 package com.capestone.hrms_backend.config;
 
 import com.capestone.hrms_backend.dto.response.*;
-import com.capestone.hrms_backend.entity.community.*;
 import com.capestone.hrms_backend.entity.expense.Expense;
 import com.capestone.hrms_backend.entity.expense.ExpenseProof;
 import com.capestone.hrms_backend.entity.job.JobCvReviewer;
@@ -100,74 +99,6 @@ public class ModelMapperConfig {
                     m.map(emp->emp.getRole().getName(),EmployeeProfileDto::setRole);
                     m.map(emp->emp.getManager().getFirstName(),EmployeeProfileDto::setManagerName);
                 });
-
-
-        // Employee -> ActorDto
-        modelMapper.typeMap(Employee.class, ActorDto.class).addMappings(m -> {
-
-            m.map(Employee::getId, ActorDto::setId);
-            m.using(empToFullName).map(src -> src, ActorDto::setFullName);
-            m.map(emp -> emp.getUser().getEmail(), ActorDto::setEmail);
-
-        });
-
-
-        modelMapper.typeMap(AchievementPost.class, PostResponseDto.class)
-                .addMappings(m -> {
-                    m.map(AchievementPost::getId, PostResponseDto::setId);
-                    m.map(AchievementPost::getTitle, PostResponseDto::setTitle);
-                    m.map(AchievementPost::getDescription, PostResponseDto::setDescription);
-                    m.map(AchievementPost::getVisibility, PostResponseDto::setVisibility);
-                    m.map(AchievementPost::isSystemGenerated, PostResponseDto::setSystemGenerated);
-                    m.map(AchievementPost::getLikeCount, PostResponseDto::setLikeCount);
-                    m.map(AchievementPost::getCommentCount, PostResponseDto::setCommentCount);
-                    m.map(AchievementPost::getCreatedAt, PostResponseDto::setCreatedAt);
-                    m.map(AchievementPost::getUpdatedAt, PostResponseDto::setUpdatedAt);
-                    m.map(AchievementPost::getDeletedAt, PostResponseDto::setDeletedAt);
-
-                    // This will use Employee -> ActorDto automatically
-                    //m.map(AchievementPost::getAuthor, PostResponseDto::setAuthor);
-                });
-
-
-        // PostComment -> CommentResponseDto
-        modelMapper.typeMap(PostComment.class, CommentResponseDto.class).addMappings(m -> {
-            m.map(src -> src.getPost().getId(), CommentResponseDto::setPostId);
-            //m.map(PostComment::getAuthor, CommentResponseDto::setAuthor);
-        });
-
-        // ModerationAction -> ModerationResponseDto
-        modelMapper.typeMap(ModerationAction.class, ModerationResponseDto.class).addMappings(m -> {
-//            m.map(ModerationAction::getActor, ModerationResponseDto::setActor);
-        });
-
-        // CelebrationJob -> CelebrationJobResponseDto
-        modelMapper.typeMap(CelebrationJob.class, CelebrationJobResponseDto.class).addMappings(m -> {
-//            m.map(CelebrationJob::getEmployee, CelebrationJobResponseDto::setEmployee);
-            m.map(src -> src.getPost() != null ? src.getPost().getId() : null,
-                    CelebrationJobResponseDto::setPostId);
-        });
-
-
-        // PostLike -> LikeResponseDto
-        modelMapper.typeMap(PostLike.class, LikeResponseDto.class).addMappings(m -> {
-            m.map(PostLike::getId, LikeResponseDto::setId);
-            m.map(src -> src.getPost().getId(), LikeResponseDto::setPostId);
-//            m.map(PostLike::getEmployee, LikeResponseDto::setEmployee); // uses Employee -> ActorDto
-            m.map(PostLike::getCreatedAt, LikeResponseDto::setCreatedAt);
-        });
-
-// PostAttachment -> AttachmentResponseDto
-        modelMapper.typeMap(PostAttachment.class, AttachmentResponseDto.class).addMappings(m -> {
-            m.map(PostAttachment::getId, AttachmentResponseDto::setId);
-            m.map(src -> src.getPost().getId(), AttachmentResponseDto::setPostId);
-            m.map(PostAttachment::getFileUrl, AttachmentResponseDto::setFileUrl);
-            m.map(PostAttachment::getFileName, AttachmentResponseDto::setFileName);
-            m.map(PostAttachment::getMimeType, AttachmentResponseDto::setMimeType);
-//            m.map(PostAttachment::getUploadedBy, AttachmentResponseDto::setUploadedBy); // Employee -> ActorDto applies
-            m.map(PostAttachment::getCreatedAt, AttachmentResponseDto::setCreatedAt);
-        });
-
         return modelMapper;
     }
 }
