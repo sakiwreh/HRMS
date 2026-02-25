@@ -33,7 +33,13 @@ export default function DocumentsTab({ travel }: Props) {
   };
  
   // Separate common documents from employee's own documents
-  const commonDocs = documents.filter((d: any) => !d.uploadedForId && d.uploadedById!==user?.id);
+  const commonDocs = documents.filter((doc: any) => {
+  if (isHR) {
+    return doc.uploadedById === user?.id && !doc.uploadedForId;
+  } else {
+    return !doc.uploadedForId && doc.uploadedById !== user?.id;
+  }
+});
   const myDocs = documents.filter((d: any) => d.uploadedById===user?.id || d.uploadedForId === user?.id);
  
   return (
@@ -153,7 +159,7 @@ function DocumentCard({
       <div className="flex gap-4">
         <button
           type="button"
-          onClick={() => previewDocument(doc.id)}
+          onClick={() => previewDocument(doc.filePath)}
           className="text-blue-600 text-sm hover:underline"
         >
           Preview

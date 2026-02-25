@@ -11,6 +11,7 @@ import {
   fetchExpenseById
 } from "../api/expenseApi";
 import toast from "react-hot-toast";
+import { useAppSelector } from "../../../store/hooks";
  
 const statusBadge: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600",
@@ -24,12 +25,12 @@ export default function ExpenseDetailPage() {
   const expenseId = Number(id);
  
   // Fetch expense from my-expenses cache or refetch
-  const user = JSON.parse(localStorage.getItem("auth_user") || "null");
+  const user = useAppSelector((s) => s.auth.user);
   const isHR = user?.role === "HR";
   const backLink = isHR ? "/dashboard/expenses/review" : "/dashboard/expenses";
   const backLabel = isHR ? "← Back to Review" : "← Back to Expenses";
  
-  // Fetch single expense by ID (works for any role)
+  // Fetch single expense by id
   const { data: expense, isLoading: expLoading } = useQuery({
     queryKey: ["expense", expenseId],
     queryFn: () => fetchExpenseById(expenseId),
@@ -175,6 +176,7 @@ export default function ExpenseDetailPage() {
         )}
  
         {/* Upload form */}
+        {!isHR && 
         <div className="border-t pt-4 mt-4">
           <h3 className="text-sm font-medium text-gray-700 mb-2">
             Upload New Proof
@@ -201,6 +203,7 @@ export default function ExpenseDetailPage() {
             </button>
           </div>
         </div>
+}
       </div>
     </div>
   );

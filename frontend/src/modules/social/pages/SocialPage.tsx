@@ -16,6 +16,9 @@ import useRunSocialCelebrations from "../hooks/useRunSocialCelebration";
 import useSocialFeed from "../hooks/useSocialFeed";
 import useUnlikeSocialPost from "../hooks/useUnlikeSocialPost";
 import useUpdateSocialPost from "../hooks/useUpdateSocialPost";
+import Modal from "../../../shared/components/Modal";
+import { FaFilter } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
 
 const toStartDateTime = (dateValue: string): string | undefined => {
   if (!dateValue) return undefined;
@@ -36,6 +39,9 @@ export default function SocialPage() {
   const [tag, setTag] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  const [open, setOpen] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
 
   const queryParams = useMemo(() => {
     const parsedAuthorId = authorId ? Number(authorId) : undefined;
@@ -75,6 +81,7 @@ export default function SocialPage() {
   const createPost = async (payload: SocialPostCreateRequest) => {
     await createPostMutation.mutateAsync(payload);
     toast.success("Post created");
+    setOpen(false);
   };
 
   const updatePost = async (postId: number, payload: SocialPostUpdateRequest) => {
@@ -123,14 +130,21 @@ export default function SocialPage() {
               : "Run Daily Celebrations"}
           </button>
         )}
+
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            + Create Post
+          </button>
       </div>
-
-      <SocialPostComposer
-        submitting={createPostMutation.isPending}
-        onSubmit={createPost}
-      />
-
-      <SocialFilterBar
+      <button
+              onClick={() => setShowFilter(!showFilter)}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              {showFilter ? <MdCancel/> : <FaFilter/>}
+      </button>
+      {showFilter && <SocialFilterBar
         employees={employees}
         authorId={authorId}
         tag={tag}
@@ -141,7 +155,7 @@ export default function SocialPage() {
         onFromDateChange={setFromDate}
         onToDateChange={setToDate}
         onClear={clearFilters}
-      />
+      />}
 
       {isLoading && <div className="text-sm text-gray-500">Loading social feed...</div>}
 
@@ -166,6 +180,17 @@ export default function SocialPage() {
           />
         ))}
       </div>
+
+      <Modal
+        title="Create Post"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <SocialPostComposer
+        submitting={createPostMutation.isPending}
+        onSubmit={createPost}
+      />
+      </Modal>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import api from "../../../lib/axios";
-export const previewDocument = (docId: number) => {
-  const url = `http://localhost:8080/travel-plan/documents/${docId}/download`;
+export const previewDocument = (docId: string) => {
+  const url = `http://localhost:8080/${docId}`;
   window.open(url, "_blank");
 };
  

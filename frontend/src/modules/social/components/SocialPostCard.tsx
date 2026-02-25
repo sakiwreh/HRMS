@@ -6,6 +6,7 @@ import type {
   SocialVisibility,
 } from "../api/socialApi";
 import SocialCommentSection from "./SocialcommentsSection";
+import { SlDislike, SlLike } from "react-icons/sl";
 
 type Props = {
   post: SocialPostResponse;
@@ -17,6 +18,17 @@ type Props = {
   onDelete: (postId: number, reason?: string) => Promise<void>;
   isBusy?: boolean;
 };
+
+function getInitials(name: string | null | undefined): string {
+  if (!name || !name.trim()) return "?";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  }
 
 export default function SocialPostCard({
   post,
@@ -87,7 +99,11 @@ export default function SocialPostCard({
 
   return (
     <article className="bg-white rounded-xl shadow p-4">
-      <div className="flex justify-between gap-3">
+      <div className="flex gap-3">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 bg-gray-200 text-gray-600">
+          {getInitials(post.author.name)}
+        </div>
         <div>
           <p className="text-sm font-semibold text-gray-800">{post.author.name}</p>
           <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleString()}</p>
@@ -178,7 +194,7 @@ export default function SocialPostCard({
           disabled={isBusy}
           className="text-blue-600 hover:underline disabled:opacity-50"
         >
-          Like
+          <SlLike/>
         </button>
         <button
           type="button"
@@ -186,7 +202,7 @@ export default function SocialPostCard({
           disabled={isBusy}
           className="text-blue-600 hover:underline disabled:opacity-50"
         >
-          Unlike
+          <SlDislike/>
         </button>
         <button
           type="button"

@@ -117,7 +117,6 @@ export default function GameSlotsView({ game, onBack }: Props) {
         )}
       </div>
  
-      {/* SLOTS */}
       {isLoading ? (
         <p className="text-gray-400">Loading slots...</p>
       ) : byDate.length === 0 ? (
@@ -150,7 +149,6 @@ export default function GameSlotsView({ game, onBack }: Props) {
                     </span>
                   </div>
  
-                  {/* Book button for non-HR when slot is available */}
                   { s.status === "AVAILABLE" && (
                     <button
                       onClick={() => setBookSlot(s)}
@@ -166,7 +164,6 @@ export default function GameSlotsView({ game, onBack }: Props) {
         ))
       )}
  
-      {/* BOOK SLOT MODAL */}
       {bookSlot && (
         <Modal
           title="Book a Slot"

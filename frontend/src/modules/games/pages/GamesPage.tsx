@@ -16,16 +16,16 @@ import GameSlotsView from "./GameSlotView";
 export default function GamesPage() {
   const user = useAppSelector((s) => s.auth.user);
   const isHR = user?.role === "HR";
- 
-  const allGames = useAllGames(isHR);
-  const activeGames = useActiveGames();
+
+  const allGames = isHR ? useAllGames(isHR): null;
+  const activeGames = !isHR ? useActiveGames() : null;
   const { data: interests = [] } = useMyInterests();
   const regInterest = useRegisterInterest();
   const rmInterest = useRemoveInterest();
   const toggleGame = useToggleGame();
  
-  const games: GameDto[] = (isHR ? allGames.data : activeGames.data) ?? [];
-  const loading = isHR ? allGames.isLoading : activeGames.isLoading;
+  const games: GameDto[] = (isHR ? allGames?.data : activeGames?.data) ?? [];
+  const loading = isHR ? allGames?.isLoading : activeGames?.isLoading;
  
   const [formOpen, setFormOpen] = useState(false);
   const [editGame, setEditGame] = useState<GameDto | undefined>();

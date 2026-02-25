@@ -220,12 +220,12 @@ public class ExpenseServiceImpl implements IExpenseService {
     }
 
     private void validateExpense(ExpenseRequestDto requestDto, TravelPlan plan, ExpenseCategory category, Long empId) {
-        if (requestDto.getExpenseDate().isBefore(plan.getDepatureDate()))
+        if (requestDto.getExpenseDate().isBefore(plan.getDepatureDate()) || requestDto.getExpenseDate().isAfter(plan.getReturnDate()))
             throw new BusinessException("Expense must be filed for travel duration only.");
-        if (requestDto.getExpenseDate().isAfter(plan.getReturnDate()))
-            throw new BusinessException("Expense date cannot be after the travel return date.");
         if (LocalDateTime.now().isAfter(plan.getReturnDate().plusDays(10)))
             throw new BusinessException("Expense window closed");
+        if(LocalDateTime.now().isBefore(requestDto.getExpenseDate()))
+            throw new BusinessException("You can only file expenses for future date.");
 
         // Category limit validation
         if (category.getLimit_in_inr() != null &&

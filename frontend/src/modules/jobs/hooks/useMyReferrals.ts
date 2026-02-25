@@ -5,5 +5,6 @@ export default function useMyReferrals() {
   return useQuery({
     queryKey: ["referrals", "me"],
     queryFn: fetchMyReferrals,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
