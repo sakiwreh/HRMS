@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "../../../store/hooks";
 import useEmployeeLookup from "../../org/hooks/useEmployeeLookup";
 import type {
-  SocialPostCreateRequest,
+  SocialPostCreateInput,
   SocialPostUpdateRequest,
 } from "../api/socialApi";
 import SocialFilterBar from "../components/SocialFilterBar";
@@ -78,8 +78,8 @@ export default function SocialPage() {
     likePostMutation.isPending ||
     unlikePostMutation.isPending;
 
-  const createPost = async (payload: SocialPostCreateRequest) => {
-    await createPostMutation.mutateAsync(payload);
+  const createPost = async (input: SocialPostCreateInput) => {
+    await createPostMutation.mutateAsync(input);
     toast.success("Post created");
     setOpen(false);
   };
@@ -142,7 +142,7 @@ export default function SocialPage() {
               onClick={() => setShowFilter(!showFilter)}
               className="text-sm text-blue-600 hover:underline"
             >
-              {showFilter ? <MdCancel/> : <FaFilter/>}
+              {showFilter ? <MdCancel className="h-4 w-4"/> : <FaFilter className="h-4 w-4"/>}
       </button>
       {showFilter && <SocialFilterBar
         employees={employees}

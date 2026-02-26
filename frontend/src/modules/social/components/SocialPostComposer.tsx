@@ -1,12 +1,13 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import type {
+  SocialPostCreateInput,
   SocialPostCreateRequest,
   SocialVisibility,
 } from "../api/socialApi";
 
 type Props = {
   submitting: boolean;
-  onSubmit: (payload: SocialPostCreateRequest) => Promise<void>;
+  onSubmit: (input: SocialPostCreateInput) => Promise<void>;
 };
 
 export default function SocialPostComposer({ submitting, onSubmit }: Props) {
@@ -14,12 +15,14 @@ export default function SocialPostComposer({ submitting, onSubmit }: Props) {
   const [description, setDescription] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [visibility, setVisibility] = useState<SocialVisibility>("ALL");
+  const [images, setImages] = useState<File[]>([]);
 
   const reset = () => {
     setTitle("");
     setDescription("");
     setTagsInput("");
     setVisibility("ALL");
+    setImages([]);
   };
 
   const parseTags = (value: string): string[] => {
@@ -34,6 +37,19 @@ export default function SocialPostComposer({ submitting, onSubmit }: Props) {
     return Array.from(unique.values());
   };
 
+  const handleImagePick = (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files ?? []);
+    if (selected.length === 0) return;
+    const onlyImages = selected.filter((file) => file.type.startsWith("image/"));
+    const merged = [...images, ...onlyImages].slice(0, 10);
+    setImages(merged);
+    event.target.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const payload: SocialPostCreateRequest = {
@@ -42,7 +58,10 @@ export default function SocialPostComposer({ submitting, onSubmit }: Props) {
       visibility,
       tags: parseTags(tagsInput),
     };
-    await onSubmit(payload);
+    await onSubmit({
+      payload,
+      images
+    });
     reset();
   };
 
@@ -87,6 +106,38 @@ export default function SocialPostComposer({ submitting, onSubmit }: Props) {
           <option value="DEPARTMENT">Department</option>
           <option value="MANAGER_ONLY">Manager Only</option>
         </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm text-gray-700">
+          Images (optional, up to 10)
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImagePick}
+          className="w-full border rounded px-3 py-2 text-sm bg-white"
+        />
+        {images.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {images.map((image, index) => (
+              <div
+                key={`${image.name}-${index}`}
+                className="flex items-center justify-between rounded border px-2 py-1 text-xs text-gray-700"
+              >
+                <span className="truncate pr-2">{image.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="text-red-600 hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end">

@@ -32,7 +32,7 @@ export default function JobCard({ job, role }: { job: Job; role: string }) {
             </p>
           </div>
  
-          <span className="ml-3 shrink-0 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+          <span className={`ml-3 shrink-0 text-xs ${job.status==='OPEN'?'bg-green-100 text-green-700':''} ${job.status==='HOLD'?'bg-yellow-100 text-yellow-700':''} ${job.status==='CLOSED'?'bg-red-100 text-red-700' : ''} px-2 py-0.5 rounded-full`}>
             {job.status}
           </span>
         </div>

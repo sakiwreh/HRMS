@@ -17,6 +17,14 @@ export interface SocialCommentResponse {
   updatedAt: string;
 }
 
+export interface SocialPostImageResponse {
+  id: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  url: string;
+}
+
 export interface SocialPostResponse {
   id: number;
   author: SocialActorResponse;
@@ -30,6 +38,7 @@ export interface SocialPostResponse {
   commentCount: number;
   createdAt: string;
   updatedAt: string;
+  images: SocialPostImageResponse[];
   recentComments: SocialCommentResponse[];
 }
 
@@ -60,6 +69,11 @@ export interface SocialPostCreateRequest {
   tags?: string[];
 }
 
+export interface SocialPostCreateInput {
+  payload: SocialPostCreateRequest;
+  images?: File[];
+}
+
 export interface SocialPostUpdateRequest {
   title?: string;
   description?: string;
@@ -75,25 +89,60 @@ export interface SocialCommentUpdateRequest {
   text: string;
 }
 
+const toAbsoluteUrl = (url: string): string => {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = String(api.defaults.baseURL ?? "").replace(/\/$/, "");
+  const path = url.replace(/^\//, "");
+  return base ? `${base}/${path}` : `/${path}`;
+};
+
+const normalizePost = (post: SocialPostResponse): SocialPostResponse => ({
+  ...post,
+  images: (post.images ?? []).map((image) => ({
+    ...image,
+    url: toAbsoluteUrl(image.url),
+  })),
+  recentComments: post.recentComments ?? [],
+});
+
 export const fetchSocialFeed = async (
   params: SocialFeedParams
 ): Promise<SpringPage<SocialPostResponse>> => {
   const response = await api.get("/social/posts", { params });
-  return response.data;
+  return {
+    ...response.data,
+    content: (response.data.content ?? []).map(normalizePost),
+  };
 };
 
 export const fetchSocialPost = async (
   postId: number
 ): Promise<SocialPostResponse> => {
   const response = await api.get(`/social/posts/${postId}`);
-  return response.data;
+  return normalizePost(response.data);
 };
 
 export const createSocialPost = async (
-  payload: SocialPostCreateRequest
+  input: SocialPostCreateInput
 ): Promise<SocialPostResponse> => {
-  const response = await api.post("/social/posts", payload);
-  return response.data;
+  const images = input.images ?? [];
+  if (images.length === 0) {
+    const response = await api.post("/social/posts", input.payload);
+    return normalizePost(response.data);
+  }
+
+  const formData = new FormData();
+  formData.append(
+    "payload",
+    new Blob([JSON.stringify(input.payload)], { type: "application/json" })
+  );
+  images.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  const response = await api.post("/social/posts", formData);
+  return normalizePost(response.data);
 };
 
 export const updateSocialPost = async (
@@ -101,7 +150,7 @@ export const updateSocialPost = async (
   payload: SocialPostUpdateRequest
 ): Promise<SocialPostResponse> => {
   const response = await api.patch(`/social/posts/${postId}`, payload);
-  return response.data;
+  return normalizePost(response.data);
 };
 
 export const deleteSocialPost = async (

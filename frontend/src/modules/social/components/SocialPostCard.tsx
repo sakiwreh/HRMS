@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import type {
   SocialPostResponse,
@@ -42,6 +42,7 @@ export default function SocialPostCard({
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const [title, setTitle] = useState(post.title);
   const [description, setDescription] = useState(post.description);
@@ -51,6 +52,11 @@ export default function SocialPostCard({
   const isOwner = post.author.id === currentUserId;
   const canEdit = isOwner && !post.systemGenerated;
   const canDelete = isOwner || isHr;
+  const images = post.images ?? [];
+
+  useEffect(()=>{
+    setActiveImageIndex(0);
+  },[post.id]);
 
   const parseTags = (value: string): string[] => {
     const unique = new Map<string, string>();
@@ -96,6 +102,17 @@ export default function SocialPostCard({
   const unlikePost = async () => {
     await onUnlike(post.id);
   };
+
+  const showPrevImage = () => {
+    if(images.length <= 1) return;
+    setActiveImageIndex((prev) => (prev === 0 ? images.length-1:prev-1));
+  }
+
+  const showNextImage = () => {
+    if (images.length <= 1) return;
+    setActiveImageIndex((prev) => (prev + 1) % images.length);
+  };
+
 
   return (
     <article className="bg-white rounded-xl shadow p-4">
@@ -180,6 +197,48 @@ export default function SocialPostCard({
                   #{tag}
                 </span>
               ))}
+            </div>
+          )}
+          {images.length > 0 && (
+            <div className="pt-1">
+              <div className="relative w-full max-w-[500px] mx-auto aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 shadow-md">
+                <img
+                  src={images[activeImageIndex]?.url}
+                  alt={images[activeImageIndex]?.fileName || post.title}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                />
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={showPrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 text-white text-lg leading-none"
+                    >
+                      {"<"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={showNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 text-white text-lg leading-none"
+                    >
+                      {">"}
+                    </button>
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                      {images.map((image, index) => (
+                        <button
+                          type="button"
+                          key={image.id}
+                          onClick={() => setActiveImageIndex(index)}
+                          className={`h-2 w-2 rounded-full ${
+                            index === activeImageIndex ? "bg-white" : "bg-white/50"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -204,6 +204,7 @@ export default function MyExpensesPage() {
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3 text-right">Amount</th>
                   <th className="px-4 py-3">Description</th>
+                  <th className="px-4 py-3">Edit</th>
                   <th className="px-4 py-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -221,6 +222,13 @@ export default function MyExpensesPage() {
                     <td className="px-4 py-3 text-gray-600">
                       {d.description || "—"}
                     </td>
+                    <td className="px-4 py-2 text-center">
+                          <NavLink
+                            to={`/dashboard/expenses/${d.id}`}
+                            className="text-blue-600 hover:underline text-xs"
+                          >Edit
+                          </NavLink>
+                        </td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => submitMutation.mutate(d.id)}
