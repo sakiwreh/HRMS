@@ -1,32 +1,26 @@
 package com.capestone.hrms_backend.service.impl;
 
 import com.capestone.hrms_backend.dto.social.request.SocialPostCreateRequest;
+import com.capestone.hrms_backend.dto.social.request.SocialPostImageContent;
 import com.capestone.hrms_backend.dto.social.request.SocialPostUpdateRequest;
-import com.capestone.hrms_backend.dto.social.response.SocialActorResponse;
-import com.capestone.hrms_backend.dto.social.response.SocialCommentResponse;
-import com.capestone.hrms_backend.dto.social.response.SocialLikeResponse;
-import com.capestone.hrms_backend.dto.social.response.SocialPostResponse;
+import com.capestone.hrms_backend.dto.social.response.*;
 import com.capestone.hrms_backend.entity.organization.Employee;
-import com.capestone.hrms_backend.entity.social.SocialPost;
-import com.capestone.hrms_backend.entity.social.SocialPostComment;
-import com.capestone.hrms_backend.entity.social.SocialPostLike;
-import com.capestone.hrms_backend.entity.social.SocialTag;
-import com.capestone.hrms_backend.entity.social.SocialVisibility;
+import com.capestone.hrms_backend.entity.social.*;
 import com.capestone.hrms_backend.exception.BusinessException;
 import com.capestone.hrms_backend.exception.ResourceNotFoundException;
 import com.capestone.hrms_backend.repository.organization.EmployeeRepository;
-import com.capestone.hrms_backend.repository.social.SocialPostCommentRepository;
-import com.capestone.hrms_backend.repository.social.SocialPostLikeRepository;
-import com.capestone.hrms_backend.repository.social.SocialPostRepository;
-import com.capestone.hrms_backend.repository.social.SocialTagRepository;
+import com.capestone.hrms_backend.repository.social.*;
 import com.capestone.hrms_backend.service.IEmailService;
 import com.capestone.hrms_backend.service.ISocialPostService;
+import com.capestone.hrms_backend.service.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -40,22 +34,28 @@ public class SocialPostServiceImpl implements ISocialPostService {
     private final SocialPostCommentRepository commentRepository;
     private final EmployeeRepository employeeRepository;
     private final IEmailService emailService;
+    private final FileStorageService fileStorageService;
+    private final SocialPostImageRepository imageRepository;
 
-    @Override
-    @Transactional
-    public SocialPostResponse createPost(Long actorEmployeeId, SocialPostCreateRequest request) {
-        Employee author = getEmployee(actorEmployeeId);
+    private static final int MAX_IMAGES_PER_POST = 10;
+    //5 MB
+    private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
 
-        SocialPost post = new SocialPost();
-        post.setAuthor(author);
-        post.setTitle(request.getTitle().trim());
-        post.setDescription(request.getDescription().trim());
-        post.setVisibility(request.getVisibility() == null ? SocialVisibility.ALL : request.getVisibility());
-        post.setTags(resolveTags(request.getTags()));
-
-        SocialPost saved = postRepository.save(post);
-        return toPostResponse(saved, Collections.emptyList());
-    }
+//    @Override
+//    @Transactional
+//    public SocialPostResponse createPost(Long actorEmployeeId, SocialPostCreateRequest request) {
+//        Employee author = getEmployee(actorEmployeeId);
+//
+//        SocialPost post = new SocialPost();
+//        post.setAuthor(author);
+//        post.setTitle(request.getTitle().trim());
+//        post.setDescription(request.getDescription().trim());
+//        post.setVisibility(request.getVisibility() == null ? SocialVisibility.ALL : request.getVisibility());
+//        post.setTags(resolveTags(request.getTags()));
+//
+//        SocialPost saved = postRepository.save(post);
+//        return toPostResponse(saved, Collections.emptyList());
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -166,6 +166,38 @@ public class SocialPostServiceImpl implements ISocialPostService {
         });
     }
 
+    @Override
+    public SocialPostResponse createPost(Long actorEmployeeId, SocialPostCreateRequest request, List<MultipartFile> images) {
+        Employee author = getEmployee(actorEmployeeId);
+
+        SocialPost post = new SocialPost();
+        post.setAuthor(author);
+        post.setTitle(request.getTitle().trim());
+        post.setDescription(request.getDescription().trim());
+        post.setVisibility(request.getVisibility() == null ? SocialVisibility.ALL : request.getVisibility());
+        post.setTags(resolveTags(request.getTags()));
+
+        SocialPost saved = postRepository.save(post);
+        attachImages(saved, images);
+
+        return toPostResponse(saved, Collections.emptyList());
+    }
+
+    @Override
+    public SocialPostImageContent getPostImageContent(Long imageId) {
+        SocialPostImage image = imageRepository.findByIdAndPostDeletedAtIsNull(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post image not found: " + imageId));
+        try {
+            return new SocialPostImageContent(
+                    image.getFileName(),
+                    image.getFileType(),
+                    fileStorageService.read(image.getFilePath())
+            );
+        } catch (IOException ex) {
+            throw new BusinessException("Unable to load post image");
+        }
+    }
+
     private SocialPost getActivePost(Long postId) {
         return postRepository.findByIdAndDeletedAtIsNull(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found: " + postId));
@@ -205,6 +237,22 @@ public class SocialPostServiceImpl implements ISocialPostService {
         return resolved;
     }
 
+    private List<SocialPostImageResponse> toImageResponses(SocialPost post) {
+        if (post.getImages() == null || post.getImages().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return post.getImages().stream()
+                .sorted(Comparator.comparing(SocialPostImage::getId))
+                .map(image -> SocialPostImageResponse.builder()
+                        .id(image.getId())
+                        .fileName(image.getFileName())
+                        .fileType(image.getFileType())
+                        .fileSize(image.getFileSize())
+                        .url("/social/posts/images/" + image.getId())
+                        .build())
+                .toList();
+    }
+
     private SocialPostResponse toPostResponse(SocialPost post, List<SocialCommentResponse> recentComments) {
         return SocialPostResponse.builder()
                 .id(post.getId())
@@ -220,6 +268,7 @@ public class SocialPostServiceImpl implements ISocialPostService {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .recentComments(recentComments)
+                .images(toImageResponses(post))
                 .build();
     }
 
@@ -255,5 +304,50 @@ public class SocialPostServiceImpl implements ISocialPostService {
                 Reason: %s
                 """.formatted(postTitle, finalReason);
         emailService.send(targetEmployee.getUser().getEmail(), subject, body);
+    }
+
+    private void attachImages(SocialPost post, List<MultipartFile> images) {
+        if (images == null || images.isEmpty()) {
+            return;
+        }
+
+        List<MultipartFile> validImages = images.stream()
+                .filter(Objects::nonNull)
+                .filter(file -> !file.isEmpty())
+                .toList();
+
+        if (validImages.isEmpty()) {
+            return;
+        }
+
+        if (validImages.size() > MAX_IMAGES_PER_POST) {
+            throw new BusinessException("A post can have at most " + MAX_IMAGES_PER_POST + " images");
+        }
+
+        List<SocialPostImage> newImages = new ArrayList<>();
+        for (MultipartFile image : validImages) {
+            String contentType = image.getContentType() == null ? "" : image.getContentType().trim();
+            if (!contentType.startsWith("image/")) {
+                throw new BusinessException("Only image files are allowed");
+            }
+            if (image.getSize() > MAX_IMAGE_SIZE_BYTES) {
+                throw new BusinessException("Each image must be <= 5 MB");
+            }
+            try {
+                String path = fileStorageService.saveSocialPostImage(post.getId(), image);
+                SocialPostImage postImage = new SocialPostImage();
+                postImage.setPost(post);
+                postImage.setFileName(image.getOriginalFilename() == null ? "image" : image.getOriginalFilename());
+                postImage.setFileType(contentType);
+                postImage.setFileSize(image.getSize());
+                postImage.setFilePath(path);
+                newImages.add(postImage);
+            } catch (IOException ex) {
+                throw new BusinessException("Unable to save post image");
+            }
+        }
+
+        imageRepository.saveAll(newImages);
+        post.getImages().addAll(newImages);
     }
 }

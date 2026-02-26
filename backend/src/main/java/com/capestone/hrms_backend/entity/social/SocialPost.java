@@ -72,4 +72,8 @@ public class SocialPost extends Base {
             }
     )
     private Set<SocialTag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private Set<SocialPostImage> images = new HashSet<>();
 }

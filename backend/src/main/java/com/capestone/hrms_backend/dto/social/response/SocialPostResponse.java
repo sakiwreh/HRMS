@@ -1,11 +1,13 @@
 package com.capestone.hrms_backend.dto.social.response;
 
 import com.capestone.hrms_backend.entity.social.SocialCelebrationType;
+import com.capestone.hrms_backend.entity.social.SocialPostImage;
 import com.capestone.hrms_backend.entity.social.SocialVisibility;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -24,4 +26,5 @@ public class SocialPostResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<SocialCommentResponse> recentComments;
+    private List<SocialPostImageResponse> images;
 }
