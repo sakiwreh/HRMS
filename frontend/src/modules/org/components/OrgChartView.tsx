@@ -40,15 +40,13 @@ function NodeCard ({
       `}
     >
       <div className="flex items-center gap-3">
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${
-            isSelected
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-600"
-          }`}
-        >
-          {getInitials(node.name)}
-        </div>
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-600"}`}>
+          {node.profilePath ? (
+            <img src={`${(window as any).API_BASE || "http://localhost:8080"}/employees/photo/${node.id}`} alt="avatar" className="w-full h-full object-cover rounded-full" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">{getInitials(node.name)}</div>
+          )}
+       </div>
         <div className="min-w-0">
           <p className="font-medium text-gray-900 text-sm truncate">
             {node.name}

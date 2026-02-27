@@ -19,4 +19,5 @@ public class EmployeeProfileDto {
     private String managerName;
     private LocalDate dob;
     private LocalDate doj;
+    private String profilePath;
 }

@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   role: "HR" | "MANAGER" | "EMPLOYEE";
   token?: string;
+  profilePath?: string | null;
 }
  
 interface AuthState {

@@ -122,6 +122,15 @@ public class FileStorageService {
         return path.toString();
     }
 
+    public String saveProfile(Long empId, MultipartFile file) throws IOException {
+        String folder = basePath + "profiles/" + empId + "/";
+        Files.createDirectories(Paths.get(folder));
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path path = Paths.get(folder + fileName);
+        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+        return path.toString();
+    }
+
 
     public byte[] read(String path) throws IOException{
         return Files.readAllBytes(Paths.get(path));

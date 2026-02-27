@@ -73,7 +73,7 @@ export default function MyExpensesPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">My Expenses</h1>
+        <h1 className="text-xl font-semibold text-[#2F8A2F]">My Expenses</h1>
         <button
           onClick={() => setOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
@@ -141,7 +141,6 @@ export default function MyExpensesPage() {
                     <tr>
                       <th className="px-4 py-2">Date</th>
                       <th className="px-4 py-2">Category</th>
-                      <th className="px-4 py-2">Description</th>
                       <th className="px-4 py-2 text-right">Amount</th>
                       <th className="px-4 py-2 text-center">Status</th>
                       <th className="px-4 py-2 text-center">Proofs</th>
@@ -155,9 +154,6 @@ export default function MyExpensesPage() {
                           {new Date(e.expenseDate).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-2">{e.category}</td>
-                        <td className="px-4 py-2 text-gray-600">
-                          {e.description || "—"}
-                        </td>
                         <td className="px-4 py-2 text-right font-medium">
                           ₹{e.amount}
                         </td>

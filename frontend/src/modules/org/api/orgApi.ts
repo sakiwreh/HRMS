@@ -5,6 +5,7 @@ export type EmployeeNode = {
   name: string;
   designation: string | null;
   department: string | null;
+  profilePath?: string | null;
 };
  
 export type OrgChartResponse = {
@@ -19,6 +20,7 @@ export type EmployeeLookup = {
   email: string;
   designation: string | null;
   department: string | null;
+  profilePath?: string | null;
 };
  
 export const fetchOrgChart = async (empId: number): Promise<OrgChartResponse> => {

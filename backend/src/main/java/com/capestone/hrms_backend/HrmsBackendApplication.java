@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableAsync
+@EnableScheduling
 public class HrmsBackendApplication {
 
 	public static void main(String[] args) {

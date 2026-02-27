@@ -13,4 +13,5 @@ public class EmployeeLookupDto {
     private String email;
     private String designation;
     private String department;
+    private String profilePath;
 }

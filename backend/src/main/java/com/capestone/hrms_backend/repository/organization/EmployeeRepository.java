@@ -22,7 +22,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         CONCAT(e.firstName,' ',e.lastName),
         e.user.email,
         e.designation,
-        e.department.name
+        e.department.name,
+        e.profilePath
     )
     FROM Employee e
     ORDER BY e.firstName

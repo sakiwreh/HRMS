@@ -86,7 +86,7 @@ export default function ExpenseReviewPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center gap-3 flex-wrap">
-        <h1 className="text-xl font-semibold">Expense Review</h1>
+        <h1 className="text-xl font-semibold text-[#2F8A2F]">Expense Review</h1>
  
         <div className="flex gap-3 items-center">
           <input
@@ -209,7 +209,6 @@ export default function ExpenseReviewPage() {
                   <th className="px-4 py-3">Travel</th>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3 text-right">Amount</th>
                   <th className="px-4 py-3 text-center">Proofs</th>
                   <th className="px-4 py-3 text-center">Status</th>
@@ -228,9 +227,8 @@ export default function ExpenseReviewPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       {new Date(e.expenseDate).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3">{e.category}</td>
-                    <td className="px-4 py-3 text-gray-600 max-w-[160px] truncate">
-                      {e.description || "—"}
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{e.category}</span>
                     </td>
                     <td className="px-4 py-3 text-right font-medium">
                       ₹{e.amount}

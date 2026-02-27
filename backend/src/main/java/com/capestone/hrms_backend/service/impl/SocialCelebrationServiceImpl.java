@@ -42,6 +42,7 @@ public class SocialCelebrationServiceImpl implements ISocialCelebrationService {
     }
 
     private void createCelebrationPostIfMissing(Employee employee, SocialCelebrationType type, LocalDate date) {
+        //Avoid repetitive post
         if (celebrationRecordRepository.existsByEmployeeIdAndCelebrationTypeAndCelebrationDate(employee.getId(), type, date)) {
             return;
         }

@@ -8,4 +8,6 @@ import java.util.List;
 public interface IEmployeeService {
     List<EmployeeLookupDto> getEmployeeLookup();
     EmployeeProfileDto getProfile(Long empId);
+    EmployeeProfileDto updateProfile(Long empId, EmployeeProfileDto dto);
+    String uploadProfilePhoto(Long empId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
 }

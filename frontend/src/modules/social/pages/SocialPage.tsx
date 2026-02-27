@@ -66,7 +66,6 @@ export default function SocialPage() {
   const deletePostMutation = useDeleteSocialPost();
   const likePostMutation = useLikeSocialPost();
   const unlikePostMutation = useUnlikeSocialPost();
-  const runCelebrationsMutation = useRunSocialCelebrations();
 
   const posts = feedData?.content ?? [];
   const employees = employeesData ?? [];
@@ -100,11 +99,6 @@ export default function SocialPage() {
     await unlikePostMutation.mutateAsync(postId);
   };
 
-  const runCelebrations = async () => {
-    await runCelebrationsMutation.mutateAsync();
-    toast.success("Daily celebrations run completed");
-  };
-
   const clearFilters = () => {
     setAuthorId("");
     setTag("");
@@ -118,19 +112,6 @@ export default function SocialPage() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-semibold">Achievements & Celebrations</h1>
-        {isHr && (
-          <button
-            type="button"
-            onClick={runCelebrations}
-            disabled={runCelebrationsMutation.isPending}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg disabled:opacity-50"
-          >
-            {runCelebrationsMutation.isPending
-              ? "Running..."
-              : "Run Daily Celebrations"}
-          </button>
-        )}
-
           <button
             onClick={() => setOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"

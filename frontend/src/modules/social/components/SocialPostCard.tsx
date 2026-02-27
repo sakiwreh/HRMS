@@ -7,6 +7,7 @@ import type {
 } from "../api/socialApi";
 import SocialCommentSection from "./SocialcommentsSection";
 import { SlDislike, SlLike } from "react-icons/sl";
+import api from "../../../lib/axios"
 
 type Props = {
   post: SocialPostResponse;
@@ -112,6 +113,7 @@ export default function SocialPostCard({
     if (images.length <= 1) return;
     setActiveImageIndex((prev) => (prev + 1) % images.length);
   };
+  console.log(post.author.profilePath);
 
 
   return (
@@ -119,7 +121,11 @@ export default function SocialPostCard({
       <div className="flex gap-3">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 bg-gray-200 text-gray-600">
-          {getInitials(post.author.name)}
+            {post?.author?.profilePath? (
+              <img src={`${api.defaults.baseURL}/employees/photo/${post.author.id}`} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              getInitials(post.author.name)
+            )}
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-800">{post.author.name}</p>

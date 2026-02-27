@@ -6,6 +6,7 @@ export type SocialCelebrationType = "BIRTHDAY" | "WORK_ANNIVERSARY";
 export interface SocialActorResponse {
   id: number;
   name: string;
+  profilePath?: string | null;
 }
 
 export interface SocialCommentResponse {

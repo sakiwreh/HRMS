@@ -22,5 +22,6 @@ public class OrgNodeResponseDto {
         private String name;
         private String designation;
         private String department;
+        private String profilePath;
     }
 }

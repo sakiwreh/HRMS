@@ -42,8 +42,6 @@ public class GamePlayServiceImpl implements IGamePlayService {
     private final INotificationService notificationService;
     private final IEmailService emailService;
 
-    // ═══════════════════════ INTEREST ═══════════════════════
-
     @Override
     @Transactional
     public void registerInterest(Long gameId, Long employeeId) {
@@ -99,7 +97,8 @@ public class GamePlayServiceImpl implements IGamePlayService {
                         fullName(e),
                         e.getUser() != null ? e.getUser().getEmail() : null,
                         e.getDesignation(),
-                        e.getDepartment() != null ? e.getDepartment().getName() : null))
+                        e.getDepartment().getName(),
+                        e.getProfilePath()))
                 .sorted(Comparator.comparing(EmployeeLookupDto::getName, String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }
@@ -407,7 +406,7 @@ public void allocateSlot(Long slotId) {
                         return nh;
                     });
             h.setPlayCount(h.getPlayCount() + 1);
-            h.setLastPlayedAt(LocalDateTime.now());
+            h.setLastPlayedAt(bk.getSlot().getSlotEnd());
             historyRepo.save(h);
         }
     }

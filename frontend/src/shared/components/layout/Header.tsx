@@ -5,12 +5,15 @@ import { clearUser } from "../../../modules/auth/authSlice";
 import NotificationBell from "../NotificationBell";
 import ProfileModal from "../../../modules/profile/components/ProfileModal";
 import { queryClient } from "../../../app/providers";
+import useProfile from "../../../modules/profile/hooks/useProfile";
+import api from "../../../lib/axios"
  
 export default function Header() {
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
+  const {data: profile} = useProfile();
  
   const logout = () => {
     localStorage.removeItem("auth_user");
@@ -30,26 +33,30 @@ export default function Header() {
  
   return (
     <>
-      <header className="bg-white border-b px-6 py-3 flex justify-between items-center">
-        <div className="font-semibold">Welcome, {user?.name}</div>
+      <header className="bg-[#2F8A2F] border-b px-6 py-3 flex justify-between items-center">
+        <div className="font-semibold text-white">Welcome, {user?.name}</div>
  
         <div className="flex items-center gap-4">
           <NotificationBell />
-          <span className="text-sm text-gray-500">{user?.role}</span>
+          <span className="text-sm text-white">{user?.role}</span>
  
           {/* Profile avatar */}
           <button
             type="button"
             onClick={() => setProfileOpen(true)}
-            className="w-8 h-8 rounded-full bg-blue-500 text-white text-xs font-semibold flex items-center justify-center hover:bg-blue-600 transition"
+            className="w-10 h-10 rounded-full overflow-hidden bg-gray-100"
             title="View Profile"
           >
-            {initials}
+            {profile?.profilePath ? (
+              <img src={`${api.defaults.baseURL}/employees/photo/${profile.id}`} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </button>
  
           <button
             onClick={logout}
-            className="text-red-500 text-sm hover:underline"
+            className="text-red-700 text-sm hover:underline"
           >
             Logout
           </button>

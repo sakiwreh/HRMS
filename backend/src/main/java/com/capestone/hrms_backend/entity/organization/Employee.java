@@ -3,6 +3,7 @@ package com.capestone.hrms_backend.entity.organization;
 import com.capestone.hrms_backend.entity.shared.Base;
 import com.capestone.hrms_backend.entity.travel.TravelPlan;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 

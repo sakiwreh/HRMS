@@ -66,7 +66,9 @@ public class HierarchyServiceImpl implements IHierarchyService {
                 e.getId(),
                 e.getFirstName() + " " + e.getLastName(),
                 e.getDesignation(),
-                e.getDepartment() != null ? e.getDepartment().getName() : null);
+                e.getDepartment().getName(),
+                e.getProfilePath()
+        );
     }
 
     private EmployeeShorterResponseDto toShorterDto(Employee e) {

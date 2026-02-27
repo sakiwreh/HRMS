@@ -40,6 +40,7 @@ public class AuthServiceImpl implements IAuthService {
                 .email(employee.getUser().getEmail())
                 .role(employee.getRole().getName())
                 .token(token)
+                .profilePath(employee.getProfilePath())
                 .build();
     }
 }
