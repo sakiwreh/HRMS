@@ -12,7 +12,6 @@ import SocialPostComposer from "../components/SocialPostComposer";
 import useCreateSocialPost from "../hooks/useCreateSocialPost";
 import useDeleteSocialPost from "../hooks/useDeleteSocialPost";
 import useLikeSocialPost from "../hooks/useLikeSocialPost";
-import useRunSocialCelebrations from "../hooks/useRunSocialCelebration";
 import useSocialFeed from "../hooks/useSocialFeed";
 import useUnlikeSocialPost from "../hooks/useUnlikeSocialPost";
 import useUpdateSocialPost from "../hooks/useUpdateSocialPost";
@@ -52,14 +51,13 @@ export default function SocialPage() {
       tag: tagValue || undefined,
       from: toStartDateTime(fromDate),
       to: toEndDateTime(toDate),
-      page: 0,
-      size: 20,
+      size: 5,
       sort: "createdAt,desc",
     };
   }, [authorId, tag, fromDate, toDate]);
 
   const { data: employeesData } = useEmployeeLookup();
-  const { data: feedData, isLoading } = useSocialFeed(queryParams);
+  const { data: feedData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useSocialFeed(queryParams);
 
   const createPostMutation = useCreateSocialPost();
   const updatePostMutation = useUpdateSocialPost();
@@ -67,7 +65,7 @@ export default function SocialPage() {
   const likePostMutation = useLikeSocialPost();
   const unlikePostMutation = useUnlikeSocialPost();
 
-  const posts = feedData?.content ?? [];
+  const posts = feedData?.pages.flatMap((p) => p.content)??[];
   const employees = employeesData ?? [];
 
   const busy =
@@ -161,6 +159,15 @@ export default function SocialPage() {
           />
         ))}
       </div>
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-2 pb-4">
+          <button
+          onClick={()=>fetchNextPage()} disabled={isFetchingNextPage} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50">
+            {isFetchingNextPage?"Loading...":"Load more"}
+          </button>
+        </div>
+      )}
 
       <Modal
         title="Create Post"

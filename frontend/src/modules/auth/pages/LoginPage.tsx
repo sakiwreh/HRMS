@@ -27,7 +27,7 @@ export default function LoginPage() {
   };
  
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="h-screen flex items-center justify-center bg-[#3FA037]">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-6 rounded shadow w-80"

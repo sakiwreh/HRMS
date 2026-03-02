@@ -42,7 +42,6 @@ export default function AssignParticipants({ travelId }: Props) {
       });
       toast.success("Participants saved successfully");
     } catch (error) {
-      toast.error("Failed to save participants");
     }
   };
  

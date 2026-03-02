@@ -20,5 +20,6 @@ public interface IExpenseService {
     List<ExpenseResponseDto> getFiltered(Long employeeId, ExpenseStatus status, Long travelId, LocalDateTime fromDate, LocalDateTime toDate);
     List<ExpenseResponseDto> myDrafts(Long empId);
     ExpenseResponseDto submitDraft(Long expenseId, Long empId);
+    ExpenseResponseDto updateDraft(Long expenseId, Long empId, ExpenseRequestDto requestDto);
     ExpenseResponseDto getById(Long expenseId);
 }

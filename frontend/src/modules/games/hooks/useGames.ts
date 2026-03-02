@@ -190,3 +190,124 @@ export function useInterestedEmployees(gameId: number, enabled = true) {
     enabled: enabled && !!gameId,
   });
 }
+
+
+//----V2 Hooks:
+
+import {
+  fetchAllGamesV2,
+  fetchActiveGamesV2,
+  createGameV2,
+  updateGameV2,
+  toggleGameV2,
+  fetchSlotsV2,
+  registerInterestV2,
+  removeInterestV2,
+  fetchMyInterestsV2,
+  fetchInterestedEmployeesV2,
+  submitRequestV2,
+  fetchMyRequestsV2,
+  fetchMyBookingsV2,
+  cancelRequestV2
+} from "../api/gameApi";
+
+export function useAllGamesV2(enabled = true) {
+  return useQuery({ queryKey: ["gamesV2", "all"], queryFn: fetchAllGamesV2, enabled });
+}
+export function useActiveGamesV2() {
+  return useQuery({ queryKey: ["gamesV2", "active"], queryFn: fetchActiveGamesV2 });
+}
+export function useCreateGameV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createGameV2,
+    onSuccess: () => { toast.success("Game created"); qc.invalidateQueries({ queryKey: ["gamesV2"] }); },
+  });
+}
+export function useUpdateGameV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateGameV2>[1] }) => updateGameV2(id, data),
+    onSuccess: () => { toast.success("Game updated"); qc.invalidateQueries({ queryKey: ["gamesV2"] }); },
+  });
+}
+export function useToggleGameV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: toggleGameV2,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gamesV2"] }); },
+  });
+}
+
+export function useSlotsV2(gameId: number, date: string, enabled = true) {
+  return useQuery({
+    queryKey: ["slotsV2", gameId, date],
+    queryFn: () => fetchSlotsV2(gameId, date),
+    enabled: enabled && !!gameId && !!date,
+  });
+}
+
+export function useMyInterestsV2() {
+  return useQuery({ queryKey: ["interestsV2"], queryFn: fetchMyInterestsV2 });
+}
+export function useRegisterInterestV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: registerInterestV2,
+    onSuccess: () => {
+      toast.success("Interest registered");
+      qc.invalidateQueries({ queryKey: ["interestsV2"] });
+      qc.invalidateQueries({ queryKey: ["gamesV2"] });
+    },
+  });
+}
+export function useRemoveInterestV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: removeInterestV2,
+    onSuccess: () => {
+      toast.success("Interest removed");
+      qc.invalidateQueries({ queryKey: ["interestsV2"] });
+      qc.invalidateQueries({ queryKey: ["gamesV2"] });
+    },
+  });
+}
+export function useInterestedEmployeesV2(gameId: number, enabled = true) {
+  return useQuery({
+    queryKey: ["interestedV2", gameId],
+    queryFn: () => fetchInterestedEmployeesV2(gameId),
+    enabled: enabled && !!gameId,
+  });
+}
+
+export function useSubmitRequestV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ gameId, data }: { gameId: number; data: Parameters<typeof submitRequestV2>[1] }) =>
+      submitRequestV2(gameId, data),
+    onSuccess: () => {
+      toast.success("Request submitted");
+      qc.invalidateQueries({ queryKey: ["slotsV2"] });
+      qc.invalidateQueries({ queryKey: ["requestsV2"] });
+      qc.invalidateQueries({ queryKey: ["bookingsV2"] });
+    },
+  });
+}
+export function useCancelRequestV2() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: cancelRequestV2,
+    onSuccess: () => {
+      toast.success("Cancelled");
+      qc.invalidateQueries({ queryKey: ["slotsV2"] });
+      qc.invalidateQueries({ queryKey: ["requestsV2"] });
+      qc.invalidateQueries({ queryKey: ["bookingsV2"] });
+    },
+  });
+}
+export function useMyRequestsV2() {
+  return useQuery({ queryKey: ["requestsV2"], queryFn: fetchMyRequestsV2 });
+}
+export function useMyBookingsV2() {
+  return useQuery({ queryKey: ["bookingsV2"], queryFn: fetchMyBookingsV2 });
+}

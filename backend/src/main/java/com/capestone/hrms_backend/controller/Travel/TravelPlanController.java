@@ -31,8 +31,8 @@ public class TravelPlanController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TravelPlanResponseDto>> list(){
-        return ResponseEntity.ok(travelPlanService.getAllTravelPlans());
+    public ResponseEntity<List<TravelPlanResponseDto>> list(@AuthenticationPrincipal HrmsUserDetails user){
+        return ResponseEntity.ok(travelPlanService.getAllTravelPlansByCreator(user.getEmpId()));
     }
 
     @PreAuthorize("hasRole('HR')")

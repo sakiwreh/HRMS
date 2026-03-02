@@ -140,6 +140,24 @@ public class ExpenseServiceImpl implements IExpenseService {
     }
 
     @Override
+    public ExpenseResponseDto updateDraft(Long expenseId, Long empId, ExpenseRequestDto requestDto) {
+        Expense e = repo.findById(expenseId).orElseThrow(()->new ResourceNotFoundException("Expense not found"));
+        if(!e.getEmployee().getId().equals(empId)) throw new BusinessException("Do not have permission");
+        if(e.getStatus()!=ExpenseStatus.DRAFT) throw new BusinessException("Only draft expenses can be edited");
+
+        TravelPlan plan = travelPlanRepository.findById(requestDto.getTravelId()).orElseThrow(()->new ResourceNotFoundException("Travel not found"));
+        ExpenseCategory category = expenseCategoryRepository.findById(requestDto.getCategoryId()).orElseThrow(()->new ResourceNotFoundException("Category not found"));
+
+        e.setTravelPlan(plan);
+        e.setCategory(category);
+        e.setAmount(requestDto.getAmount());
+        e.setDescription(requestDto.getDescription());
+        e.setExpenseDate(requestDto.getExpenseDate());
+        repo.save(e);
+        return toDto(e);
+    }
+
+    @Override
     public List<ExpenseResponseDto> pendingExepnses() {
         return repo.findByStatus(ExpenseStatus.PENDING).stream().map(this::toDto).toList();
     }
@@ -202,7 +220,7 @@ public class ExpenseServiceImpl implements IExpenseService {
         return toDto(e);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────
+    //Helpers
 
     private ExpenseResponseDto toDto(Expense e) {
         ExpenseResponseDto dto = modelMapper.map(e, ExpenseResponseDto.class);

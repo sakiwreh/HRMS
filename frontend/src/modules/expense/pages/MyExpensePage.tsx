@@ -8,6 +8,7 @@ import type { ExpenseResponse } from "../api/expenseApi";
 import { submitDraft } from "../api/expenseApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import EditDraftForm from "../components/EditDraftForm";
  
 const statusBadge: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600",
@@ -20,6 +21,7 @@ export default function MyExpensesPage() {
   const { data: expenses = [], isLoading } = useMyExpenses();
   const { data: drafts = [], isLoading: draftsLoading } = useDrafts();
   const [open, setOpen] = useState(false);
+  const [editDraft, setEditDraft] = useState<ExpenseResponse | null>(null);
   const [tab, setTab] = useState<"expenses" | "drafts">("expenses");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -200,7 +202,6 @@ export default function MyExpensesPage() {
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3 text-right">Amount</th>
                   <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Edit</th>
                   <th className="px-4 py-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -216,16 +217,12 @@ export default function MyExpensesPage() {
                       ₹{d.amount}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
-                      {d.description || "—"}
+                      {d.description || "-"}
                     </td>
-                    <td className="px-4 py-2 text-center">
-                          <NavLink
-                            to={`/dashboard/expenses/${d.id}`}
-                            className="text-blue-600 hover:underline text-xs"
-                          >Edit
-                          </NavLink>
-                        </td>
                     <td className="px-4 py-3 text-center">
+                      <button onClick={()=>setEditDraft(d)} className="text-yellow-600 hover-underline text-sm">
+                        Edit
+                      </button>
                       <button
                         onClick={() => submitMutation.mutate(d.id)}
                         disabled={submitMutation.isPending}
@@ -244,6 +241,12 @@ export default function MyExpensesPage() {
  
       <Modal title="Submit Expense" open={open} onClose={() => setOpen(false)}>
         <CreateExpenseForm onDone={() => setOpen(false)} />
+      </Modal>
+
+      <Modal title="Edit Draft" open={!!editDraft} onClose={()=>setEditDraft(null)}>
+        {editDraft && (
+          <EditDraftForm draft={editDraft} onDone={()=>setEditDraft(null)}/>
+        )}
       </Modal>
     </div>
   );

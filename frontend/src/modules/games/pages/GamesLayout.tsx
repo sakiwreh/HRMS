@@ -1,12 +1,13 @@
 import { useState } from "react";
 import GamesPage from "./GamesPage";
 import MyGameActivity from "./MyGameActivity";
- 
-const tabs = ["Games", "My Activity"] as const;
- 
+import GameV2Page from "./GameV2Page";
+
+const tabs = ["Games", "My Activity", "Game (New)"] as const;
+
 export default function GamesLayout() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Games");
- 
+
   return (
     <div className="space-y-4">
       {/* TAB BAR */}
@@ -25,9 +26,15 @@ export default function GamesLayout() {
           </button>
         ))}
       </div>
- 
+
       {/* TAB CONTENT */}
-      {tab === "Games" ? <GamesPage /> : <MyGameActivity />}
+      {tab === "Games" ? (
+        <GamesPage />
+      ) : tab === "My Activity" ? (
+        <MyGameActivity />
+      ) : (
+        <GameV2Page />
+      )}
     </div>
   );
 }

@@ -59,8 +59,8 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     }
 
     @Override
-    public List<TravelPlanResponseDto> getAllTravelPlans() {
-        return travelPlanRepository.findAll().stream()
+    public List<TravelPlanResponseDto> getAllTravelPlansByCreator(Long hrId) {
+        return travelPlanRepository.findByCreatedByIdOrderByDepatureDateDesc(hrId).stream()
                 .map(plan -> modelMapper.map(plan,TravelPlanResponseDto.class)).toList();
     }
 
@@ -103,6 +103,8 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
     public void addParticipants(Long travelPlanId, List<Long> empIds) {
         //Fetch travel plan
         TravelPlan plan = travelPlanRepository.findById(travelPlanId).orElseThrow(()->new ResourceNotFoundException("Travel plan not found."));
+
+        if(plan.getDepatureDate().isBefore(LocalDateTime.now())) throw new BusinessException("Cannot add participant in travel that already started");
 
         for(Long id : empIds){
             log.info("Employee id: {}",id);

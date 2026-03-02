@@ -92,7 +92,7 @@ export default function TravelListPage() {
                 )}
               </div>
               <div className="text-sm text-gray-500">
-                {t.destination} • {t.departureDate} to {t.returnDate}
+                {t.destination} | {new Date(t.departureDate).toLocaleDateString()} to {new Date(t.returnDate).toLocaleDateString()}
               </div>
             </>
           );

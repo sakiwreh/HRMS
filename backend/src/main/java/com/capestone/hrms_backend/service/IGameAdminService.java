@@ -15,5 +15,4 @@ public interface IGameAdminService {
     public List<GameResponseDto> getActiveGames();
     public List<GameSlotResponseDto> getSlots(Long gameId, LocalDate from, LocalDate to);
     List<Long> generateSlotsForDate(Long gameId, LocalDate date);
-
 }

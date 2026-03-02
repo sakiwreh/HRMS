@@ -45,6 +45,11 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.submitDraft(id, user.getEmployeeId()));
     }
 
+    @PutMapping("/{id}/draft")
+    public ResponseEntity<ExpenseResponseDto> updateDraft(@PathVariable Long id, @AuthenticationPrincipal HrmsUserDetails user, @Valid @RequestBody ExpenseRequestDto dto){
+        return ResponseEntity.ok(expenseService.updateDraft(id, user.getEmpId(), dto));
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<ExpenseResponseDto>> pending(){
         return ResponseEntity.ok(expenseService.pendingExepnses());

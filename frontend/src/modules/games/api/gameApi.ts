@@ -148,3 +148,72 @@ export const fetchEmployeeLookup = () =>
 
 export const fetchInterestedEmployees = (gameId: number) =>
   api.get<EmployeeLookup[]>(`/games/${gameId}/interested-employees`).then((r) => r.data);
+
+//---V2 Endpoints:
+
+export interface GameV2Dto {
+  id: number;
+  name: string;
+  active: boolean;
+  startHour: string;
+  endHour: string;
+  maxDurationMins: number;
+  maxPlayersPerSlot: number;
+  cancellationBeforeMins: number;
+}
+
+export interface SlotV2Dto {
+  gameId: number;
+  gameName: string;
+  slotStart: string;
+  slotEnd: string;
+  status: "AVAILABLE" | "REQUESTED" | "BOOKED";
+  pendingCount: number;
+}
+
+export interface BookingV2Dto {
+  id: number;
+  gameId: number;
+  gameName: string;
+  slotStart: string;
+  slotEnd: string;
+  bookedByName: string;
+  bookingDateTime: string;
+  priorityScore: number;
+  status: string;
+  participantNames: string[];
+}
+
+// Admin
+export const fetchAllGamesV2 = () => api.get<GameV2Dto[]>("/games/v2").then((r) => r.data);
+export const fetchActiveGamesV2 = () => api.get<GameV2Dto[]>("/games/v2/active").then((r) => r.data);
+export const createGameV2 = (data: Omit<GameV2Dto, "id" | "active">) =>
+  api.post<GameV2Dto>("/games/v2", data).then((r) => r.data);
+export const updateGameV2 = (id: number, data: Omit<GameV2Dto, "id" | "active">) =>
+  api.put<GameV2Dto>(`/games/v2/${id}`, data).then((r) => r.data);
+export const toggleGameV2 = (id: number) =>
+  api.patch<GameV2Dto>(`/games/v2/${id}/toggle`).then((r) => r.data);
+
+// Computed slots
+export const fetchSlotsV2 = (gameId: number, date: string) =>
+  api.get<SlotV2Dto[]>(`/games/v2/${gameId}/slots`, { params: { date } }).then((r) => r.data);
+
+// Interest
+export const registerInterestV2 = (gameId: number) =>
+  api.post<string>(`/games/v2/${gameId}/interest`).then((r) => r.data);
+export const removeInterestV2 = (gameId: number) =>
+  api.delete<string>(`/games/v2/${gameId}/interest`).then((r) => r.data);
+export const fetchMyInterestsV2 = () =>
+  api.get<GameV2Dto[]>("/games/v2/interests/me").then((r) => r.data);
+export const fetchInterestedEmployeesV2 = (gameId: number) =>
+  api.get<EmployeeLookup[]>(`/games/v2/${gameId}/interested-employees`).then((r) => r.data);
+
+// Booking requests
+export const submitRequestV2 = (gameId: number, data: { slotStart: string; participantIds: number[] }) =>
+  api.post<BookingV2Dto>(`/games/v2/${gameId}/requests`, data).then((r) => r.data);
+export const cancelRequestV2 = (bookingId: number) =>
+  api.patch<string>(`/games/v2/requests/${bookingId}/cancel`).then((r) => r.data);
+export const fetchMyRequestsV2 = () =>
+  api.get<BookingV2Dto[]>("/games/v2/requests/me").then((r) => r.data);
+export const fetchMyBookingsV2 = () =>
+  api.get<BookingV2Dto[]>("/games/v2/bookings/me").then((r) => r.data);

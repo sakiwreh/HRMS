@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ITravelPlanService {
     TravelPlanResponseDto create(TravelPlanRequestDto request, Long employeeId);
-    List<TravelPlanResponseDto> getAllTravelPlans();
+    List<TravelPlanResponseDto> getAllTravelPlansByCreator(Long empId);
     TravelPlanResponseDto cancel(Long planId);
     TravelPlanResponseDto getTravel(Long travelPlanId,Long empId, String role);
     void addParticipants(Long travelPlanId, List<Long> empIds);

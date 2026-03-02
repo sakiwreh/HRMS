@@ -51,8 +51,12 @@ export default function ExpenseReviewPage() {
   const [remarks, setRemarks] = useState("");
  
   const handleReview = (id: number, approved: boolean) => {
+    if (!approved && !remarks.trim()) {
+    toast.error("Remarks are required when rejecting an expense");
+    return;
+  }
     reviewMutation.mutate(
-      { id, data: { approved, remarks: remarks || undefined } },
+      { id, data: { approved, remarks: remarks.trim() } },
       {
         onSuccess: () => {
           setReviewingId(null);
@@ -111,20 +115,6 @@ export default function ExpenseReviewPage() {
       {showFilter && isHR && (
         <div className="bg-white rounded-xl shadow p-4 space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {/* <input
-              type="number"
-              placeholder="Employee ID"
-              className="border p-2 rounded text-sm"
-              value={filters.employeeId ?? ""}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  employeeId: e.target.value
-                    ? Number(e.target.value)
-                    : undefined,
-                }))
-              }
-            /> */}
             <select
               className="border p-2 rounded text-sm"
               value={filters.status ?? ""}
@@ -140,18 +130,6 @@ export default function ExpenseReviewPage() {
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
             </select>
-            {/* <input
-              type="number"
-              placeholder="Travel ID"
-              className="border p-2 rounded text-sm"
-              value={filters.travelId ?? ""}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  travelId: e.target.value ? Number(e.target.value) : undefined,
-                }))
-              }
-            /> */}
             <input
               type="date"
               className="border p-2 rounded text-sm"
@@ -258,9 +236,10 @@ export default function ExpenseReviewPage() {
                           <div className="space-y-2 text-left min-w-[180px]">
                             <input
                               type="text"
-                              placeholder="Remarks (optional)"
+                              placeholder="Remarks"
                               className="border p-1 rounded w-full text-xs"
                               value={remarks}
+                              required
                               onChange={(ev) => setRemarks(ev.target.value)}
                             />
                             <div className="flex gap-1">

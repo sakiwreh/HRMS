@@ -81,6 +81,11 @@ export const submitDraft = async (id: number): Promise<ExpenseResponse> => {
   const res = await api.patch(`/expenses/${id}/submit`);
   return res.data;
 };
+
+export const updateDraft = async(id:number,data: ExpenseRequest): Promise<ExpenseResponse> => {
+  const res = await api.put(`/expenses/${id}/draft`,data);
+  return res.data;
+};
  
 export const fetchPendingExpenses = async (): Promise<ExpenseResponse[]> => {
   const res = await api.get("/expenses/pending");

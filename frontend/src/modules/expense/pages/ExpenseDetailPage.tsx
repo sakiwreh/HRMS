@@ -28,7 +28,7 @@ export default function ExpenseDetailPage() {
   const user = useAppSelector((s) => s.auth.user);
   const isHR = user?.role === "HR";
   const backLink = isHR ? "/dashboard/expenses/review" : "/dashboard/expenses";
-  const backLabel = isHR ? "← Back to Review" : "← Back to Expenses";
+  const backLabel = isHR ? "Back to Review" : "Back to Expenses";
  
   // Fetch single expense by id
   const { data: expense, isLoading: expLoading } = useQuery({
