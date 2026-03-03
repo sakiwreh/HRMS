@@ -138,11 +138,11 @@ public class GamePlayV2ServiceImpl implements IGamePlayV2Service {
                 throw new BusinessException("Employee " + pid + " has not registered interest in this game");
         }
 
-        // PENDING requests are allowed; the check is enforced again at allocation time.
+        // PENDING requests are allowed
         LocalDateTime dayStart = slotStart.toLocalDate().atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
         for (Long pid : pids) {
-            if (bookingRepo.hasActiveBookingOnDate(pid, dayStart, dayEnd)) {
+            if (bookingRepo.hasActiveAndCompletedBookingOnDate(pid, dayStart, dayEnd)) {
                 Employee emp = findEmployee(pid);
                 throw new BusinessException(fullName(emp)
                         + " already has an active booking on " + slotStart.toLocalDate());
@@ -315,7 +315,7 @@ public class GamePlayV2ServiceImpl implements IGamePlayV2Service {
                 // check one-active-per-day: skip if any participant already has ACTIVE booking today
                 boolean eligible = true;
                 for (GameBookingParticipantV2 p : candidate.getParticipants()) {
-                    if (bookingRepo.hasActiveBookingOnDate(
+                    if (bookingRepo.hasActiveAndCompletedBookingOnDate(
                             p.getEmployee().getId(), dayStart, dayEnd)) {
                         eligible = false;
                         break;

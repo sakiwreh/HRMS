@@ -5,7 +5,7 @@ type Props = {
   onNodeClick: (empId: number) => void;
 };
  
-function getInitials(name: string | null | undefined): string {
+export function getInitials(name: string | null | undefined): string {
   if (!name || !name.trim()) return "?";
   return name
     .split(" ")

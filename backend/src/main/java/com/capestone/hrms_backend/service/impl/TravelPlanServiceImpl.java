@@ -90,7 +90,15 @@ public class TravelPlanServiceImpl implements ITravelPlanService {
         boolean isHr = "HR".equalsIgnoreCase(role);
         boolean isParticipant = participantRepo.findByTravelPlanIdAndEmployeeId(travelPlanId, empId).isPresent();
         boolean isCreator = plan.getCreatedBy() != null && plan.getCreatedBy().getId().equals(empId);
-        if (!isHr && !isParticipant && !isCreator) {
+        boolean isManagerOfParticipant = false;
+        if ("MANAGER".equalsIgnoreCase(role)) {
+            List<Long> teamIds = employeeRepository.findByManagerId(empId).stream()
+                    .map(Employee::getId).toList();
+            isManagerOfParticipant = participantRepo.findByTravelPlanId(travelPlanId).stream()
+                    .anyMatch(tp -> teamIds.contains(tp.getEmployee().getId()));
+        }
+
+        if (!isHr && !isParticipant && !isCreator && !isManagerOfParticipant) {
             throw new BusinessException("You are not authorized to view this travel plan");
         }
 

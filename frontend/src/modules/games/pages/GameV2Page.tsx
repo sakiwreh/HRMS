@@ -183,14 +183,14 @@ export default function GameV2Page() {
       {/* MY ACTIVITY*/}
       {!isHR && (
         <>
-          <section>
+          <section className="overflow-y-auto">
             <h2 className="text-lg font-semibold text-gray-800 mb-3">My Bookings</h2>
             {loadingB ? (
               <p className="text-gray-400 text-sm">Loading...</p>
             ) : myBookings.length === 0 ? (
               <p className="text-gray-400 text-sm">No bookings yet</p>
             ) : (
-              <div className="bg-white rounded-xl shadow divide-y">
+              <div className="bg-white rounded-xl shadow divide-y h-90 overflow-y-auto">
                 {myBookings.map((b: BookingV2Dto) => (
                   <div key={b.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div>

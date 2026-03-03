@@ -80,7 +80,16 @@ public class TravelDocumentServiceImpl implements ITravelDocumentService {
         // Only participants or HR can view documents
         boolean isHr = "HR".equalsIgnoreCase(role);
         boolean isParticipant = participantRepository.findByTravelPlanIdAndEmployeeId(travelId, empId).isPresent();
-        if (!isHr && !isParticipant) {
+
+        boolean isManagerOfParticipant = false;
+        if ("MANAGER".equalsIgnoreCase(role)) {
+            List<Long> teamIds = employeeRepository.findByManagerId(empId).stream()
+                    .map(Employee::getId).toList();
+            isManagerOfParticipant = participantRepository.findByTravelPlanId(travelId).stream()
+                    .anyMatch(tp -> teamIds.contains(tp.getEmployee().getId()));
+        }
+
+        if (!isHr && !isParticipant && !isManagerOfParticipant) {
             throw new BusinessException("You are not authorized to view documents for this travel plan");
         }
 
@@ -89,9 +98,19 @@ public class TravelDocumentServiceImpl implements ITravelDocumentService {
         // Employee/Manager: only see general docs (uploadedFor is null) + docs uploaded
         // for them + docs they uploaded
         if (!isHr) {
-            docs = docs.stream().filter(doc -> doc.getUploadedFor() == null
-                    || (doc.getUploadedFor() != null && doc.getUploadedFor().getId().equals(empId))
-                    || (doc.getUploadedBy() != null && doc.getUploadedBy().getId().equals(empId))).toList();
+            if (isManagerOfParticipant && !isParticipant) {
+                // Manager (not a participant): see general docs + team members' docs
+                List<Long> teamMemberIds = employeeRepository.findByManagerId(empId).stream()
+                        .map(Employee::getId).toList();
+                docs = docs.stream().filter(doc -> doc.getUploadedFor() == null
+                        || (doc.getUploadedFor() != null && teamMemberIds.contains(doc.getUploadedFor().getId()))
+                        || (doc.getUploadedBy() != null && teamMemberIds.contains(doc.getUploadedBy().getId()))).toList();
+            } else {
+                // Employee/participant: only own docs
+                docs = docs.stream().filter(doc -> doc.getUploadedFor() == null
+                        || (doc.getUploadedFor() != null && doc.getUploadedFor().getId().equals(empId))
+                        || (doc.getUploadedBy() != null && doc.getUploadedBy().getId().equals(empId))).toList();
+            }
         }
 
         return docs.stream().map(this::toDto).toList();

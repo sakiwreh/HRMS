@@ -41,9 +41,9 @@ public interface GameBookingV2Repository extends JpaRepository<GameBookingV2, Lo
     //Check if employee already has an Active booking on a given date for any game
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM GameBookingV2 b " +
             "JOIN b.participants p WHERE p.employee.id = :empId " +
-            "AND b.status = 'ACTIVE' " +
+            "AND b.status in ('ACTIVE','COMPLETED') " +
             "AND b.slotStart >= :dayStart AND b.slotStart < :dayEnd")
-    boolean hasActiveBookingOnDate(Long empId, LocalDateTime dayStart, LocalDateTime dayEnd);
+    boolean hasActiveAndCompletedBookingOnDate(Long empId, LocalDateTime dayStart, LocalDateTime dayEnd);
 
     //Pending or active request for same slot
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM GameBookingV2 b " +

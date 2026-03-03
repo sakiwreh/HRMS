@@ -34,19 +34,6 @@ public class ModelMapperConfig {
                 .setPropertyCondition(Conditions.isNotNull());
 
 
-        Converter<Employee, String> empToFullName = ctx -> {
-            Employee e = ctx.getSource();
-            if (e == null) return null;
-            return Arrays.asList(e.getFirstName(), e.getMiddleName(), e.getLastName())
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(String::trim)
-                    .filter(s -> !s.isBlank())
-                    .reduce((a, b) -> a + " " + b)
-                    .orElse(null);
-        };
-
-
         //HR id from: TravelPlan to TravelResponseDto
         modelMapper.typeMap(TravelPlan.class, TravelPlanResponseDto.class)
                 .addMappings(m-> {
@@ -98,6 +85,18 @@ public class ModelMapperConfig {
                     m.map(emp->emp.getDepartment().getName(),EmployeeProfileDto::setDepartment);
                     m.map(emp->emp.getRole().getName(),EmployeeProfileDto::setRole);
                     m.map(emp->emp.getManager().getFirstName(),EmployeeProfileDto::setManagerName);
+                });
+
+        modelMapper.typeMap(Employee.class, TeamMemberResponseDto.class)
+                .addMappings(m->{
+                    m.map(emp -> emp.getUser().getEmail(), TeamMemberResponseDto::setEmail);
+                    m.map(emp -> emp.getDepartment().getName(),TeamMemberResponseDto::setDepartment);
+                });
+
+        modelMapper.typeMap(Expense.class, ExpenseResponseDto.class)
+                .addMappings(m->{
+                    m.map(exp -> exp.getTravelPlan().getId(),ExpenseResponseDto::setTravelId);
+                    m.map(exp -> exp.getTravelPlan().getTitle(),ExpenseResponseDto::setTravelTitle);
                 });
         return modelMapper;
     }
