@@ -109,13 +109,13 @@ public class JobReferralServiceImpl implements IJobReferralService {
                     referral.getNotes() != null ? referral.getNotes() : "N/A");
 
             List<String> recipients = new ArrayList<>();
-            // Job's communication email (HR contact)
+            // Job's communication email
             recipients.add(referral.getJob().getCommunicationEmail());
             // Job creator's email
             if (referral.getJob().getCreatedBy().getUser() != null) {
                 recipients.add(referral.getJob().getCreatedBy().getUser().getEmail());
             }
-            // CV reviewers' emails (§6.3)
+            // CV reviewers' emails
             cvReviewerRepository.findByJobId(jobId).forEach(reviewer -> {
                 if (reviewer.getReveiwer() != null && reviewer.getReveiwer().getUser() != null) {
                     recipients.add(reviewer.getReveiwer().getUser().getEmail());

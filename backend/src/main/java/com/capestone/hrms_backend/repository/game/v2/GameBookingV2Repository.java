@@ -51,4 +51,7 @@ public interface GameBookingV2Repository extends JpaRepository<GameBookingV2, Lo
             "AND b.game.id = :gameId AND b.slotStart = :slotStart " +
             "AND b.status IN ('ACTIVE', 'PENDING')")
     boolean hasPendingOrActiveForSlot(Long empId, Long gameId, LocalDateTime slotStart);
+
+    @Query("SELECT b FROM GameBookingV2 b WHERE b.slotStart > :now and b.slotEnd <= :eod and b.status in ('ACTIVE','COMPLETED')")
+    List<GameBookingV2> findUpcomingMatchesToday(LocalDateTime now, LocalDateTime eod);
 }
