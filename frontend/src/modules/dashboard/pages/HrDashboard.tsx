@@ -27,6 +27,7 @@ export default function HrDashboard() {
         {/* Today's matches section */}
         <div className="bg-white p-6 rounded-xl shadow-lg mt-8">
           <div className="text-xl font-medium text-orange-600 mb-4">Today's Matches</div>
+          <div className="h-96 overflow-auto">
           {todayMatches && todayMatches.length > 0 ? (
             todayMatches.map((match:any, index:number) => (
               <div key={index} className="border-b py-4">
@@ -45,6 +46,7 @@ export default function HrDashboard() {
           ) : (
             <div className="text-gray-500">No upcoming matches today.</div>
           )}
+          </div>
         </div>
       </div>
     </div>
