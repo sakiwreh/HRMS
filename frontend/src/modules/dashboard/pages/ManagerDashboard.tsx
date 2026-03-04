@@ -51,7 +51,7 @@ export default function ManagerDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <NavCard label={c.label} value={c.value} link={c.link} color={c.color} />
+          <NavCard key={c.label} label={c.label} value={c.value} link={c.link} color={c.color} />
         ))}
       </div>
 
